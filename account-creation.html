@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="login.css" />
+    <title>Account Registration</title>
+  </head>
+  <body>
+    <div class="registration-container">
+      <h2 class="registration-heading">Account Creation</h2>
+      <div class="profile-picture-container">
+        <img
+          src="default-profile.png"
+          alt="Profile Picture"
+          id="profile-picture"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          id="profile-picture-upload"
+          class="profile-picture-upload"
+          onchange="loadProfilePicture(event)"
+        />
+        <label for="profile-picture-upload" class="profile-picture-label"
+          >Change Profile Picture</label
+        >
+      </div>
+      <form class="registration-form" action="registration.php" method="post">
+        <input
+          type="text"
+          placeholder="First Name"
+          name="first_name"
+          required
+        />
+        <input type="text" placeholder="Last Name" name="last_name" required />
+        <input type="text" placeholder="Username" name="username" required />
+        <input
+          type="password"
+          placeholder="Password"
+          name="password"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          name="confirm_password"
+          required
+        />
+        <input type="text" placeholder="Employee ID" name="ID" required /><br />
+        Please select your store location:
+        <select name="stores" id="stores">
+          <option value="Main">Mountain Vista</option>
+          <option value="1st">Sunset Rd</option>
+          <option value="Eastern">Eastern Rd</option>
+          <option value="Nellis">Nellis Rd</option>
+          <option value="Boulder">Boulder Hwy</option>
+        </select>
+        <br />
+        <br />
+        <div class="error-message">
+          Please fill in all sections to create an account
+        </div>
+        <button type="submit" class="registration-button">
+          Create Account
+        </button>
+      </form>
+      <a href="index.html" class="back-to-login-link">Back to Login</a>
+    </div>
+    <script>
+      function loadProfilePicture(event) {
+        const profilePicture = document.getElementById("profile-picture");
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function () {
+          profilePicture.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    </script>
+  </body>
+</html>

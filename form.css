@@ -1,0 +1,93 @@
+form {
+  width: 350px;
+  margin: auto;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background-color: #80061c;
+  padding: 16px;
+  color: #363432;
+  border-radius: 4px;
+  align-content: center;
+}
+input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  size: 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  border-style: 1px inset;
+  border-color: #196774;
+}
+label {
+  display: block;
+  width: 100%;
+  margin-top: 0px;
+  margin-right: 0px;
+  margin-bottom: 4px;
+  margin-left: 16px;
+  font-weight: bold;
+  padding: 10px;
+  size: 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  border-style: 1px solid;
+  border-color: #196774;
+}
+select {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  size: 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  border-style: 1px inset;
+  border-color: #196774;
+}
+textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  size: 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  border-style: 1px inset;
+  border-color: #196774;
+}
+fieldset {
+  margin-bottom: 24px;
+  border-radius: 4px;
+  border-color: #363432;
+}
+legend {
+  font-weight: bold;
+}
+fieldset label {
+  margin-left: 0px;
+}
+input[type="submit"] {
+  background-color: #196774;
+  border: none;
+  color: white;
+  size: 18px;
+  font-weight: bold;
+}
+input[type="submit"]:focus {
+  color: #ef6024;
+  border: 3px solid;
+}
+input[type="submit"]:hover {
+  box-shadow: -3px 3px 5px #363432;
+}
+input:focus {
+  outline: 3px solid;
+  color: #ef6024;
+}
+select:focus {
+  outline: 3px solid;
+  color: #ef6024;
+}
+textarea:focus {
+  outline: 3px solid;
+  color: #ef6024;
+}
