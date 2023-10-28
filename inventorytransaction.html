@@ -25,14 +25,20 @@
         </ul>
       </nav>
       <main>
-        <h2>Ordering Form</h2>
+        <h2>Inventory Transaction Form</h2>
         <section id="form">
-          <form id="order-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
+          <form id="inventory-transaction-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
             <div id="ingredients-container">
               <!-- Ingredient input sections will be dynamically added here -->
             </div>
             <button type="button" id="add-ingredient-btn">Add Ingredient...</button>
-            <input type="submit" value="Place Order" />
+            <span>Location ID:</span>
+            <input type="number" id="location" name="location" required="true" min="1" max="3">
+            <label for="outgoing">Outgoing Location</label>
+            <input type="radio" id="outgoing" name="locationType" value="outgoing">
+            <label for="incoming">Incoming Location</label>
+            <input type="radio" id="incoming" name="locationType" value="incoming">
+            <input type="submit" value="Log Inventory Transaction" />
           </form>
         </section>
       </main>
@@ -42,7 +48,7 @@
     </footer>
   
     <script>
-      var orderForm = document.getElementById("order-form");
+      var inventoryTransactionForm = document.getElementById("inventory-transaction-form");
       var ingredientsContainer = document.getElementById("ingredients-container");
       var addIngredientButton = document.getElementById("add-ingredient-btn");
       var ingredientCounter = 0;
@@ -92,18 +98,17 @@
         quantityInput.name = "quantity-" + ingredientCounter;
         quantityInput.required = true;
         quantityInput.min = "1";
-        quantityInput.max = "20";
         quantityInput.value = "1";
   
         measurementUnit.id = "measurementUnit-" + ingredientCounter;
-        measurementUnit.textContent = "Bags";
+        measurementUnit.textContent = "Rolls";
   
         if (ingredientCounter > 0) {
           deleteButton = document.createElement("button");
           deleteButton.type = "button";
           deleteButton.className = "delete-button";
           deleteButton.addEventListener("click", function() {
-            ingredientsContainer.removeChild(div);    
+            ingredientsContainer.removeChild(div);
           });
           //var deleteIcon = document.createElement("img");
           //deleteIcon.src = "delete-icon.png";
@@ -132,17 +137,17 @@
       function updateMeasurementUnit(select, measurementUnit) {
         var selectedOption = parseInt(select.value);
         if (selectedOption == 1) {
-          measurementUnit.textContent = "Bags";
+          measurementUnit.textContent = "Rolls";
         } else if (selectedOption >= 2 && selectedOption <= 4) {
-          measurementUnit.textContent = "Pints";
+          measurementUnit.textContent = "Fl oz";
         } else {
-          measurementUnit.textContent = "Pounds";
+          measurementUnit.textContent = "Oz";
         }
       }
   
       createIngredientSection();
 
-      orderForm.addEventListener("submit", function(event) {
+      inventoryTransactionForm.addEventListener("submit", function(event) {
         event.preventDefault();
 
         var ingredientObjects = [];
@@ -161,26 +166,37 @@
           }
         }
 
-        function getCurrentTimeInPhoenix() {
-            // Get the current date and time in UTC
+        function getCurrentDateInPhoenix() {
             var utcDate = new Date();
-
-            // Adjust the UTC time to Phoenix time
             var phoenixOffset = -7 * 60; // Phoenix is UTC-7
-            var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+            var phoenixDate = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
 
-            return phoenixTime;
+            // Get the date in YYYY-MM-DD format
+            var formattedDate = phoenixDate.toISOString().split('T')[0];
+            return formattedDate;
         }
 
-        var orderObject = {
-            orderID: 0, // Default order ID
-            username: "noUser", // Default username
-            locationID: 0, // Default location ID
-            dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " ")
+        var outgoingRadio = document.getElementById("outgoing");
+        var incomingRadio = document.getElementById("incoming");
+        var locationInput = document.getElementById("location");
+
+        var outgoingLocationID = 0; //default value
+        var incomingLocationID = 0; //default value
+
+        if (outgoingRadio.checked) {
+        outgoingLocationID = parseInt(locationInput.value);
+        } else if (incomingRadio.checked) {
+        incomingLocationID = parseInt(locationInput.value);
+        }
+
+        var inventoryTransactionObject = {
+            inventoryTransactionID: 0, // Default inventoryTransaction ID
+            date: getCurrentDateInPhoenix(),
+            incomingLocationID: incomingLocationID,
+            outgoingLocationID: outgoingLocationID
         };
 
-
-        console.log("Order Object:", orderObject);
+        console.log("inventoryTransaction Object:", inventoryTransactionObject);
         console.log("Ingredient Objects:", ingredientObjects);
       });
 

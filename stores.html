@@ -18,21 +18,24 @@
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="stores.html">Stores</a></li>
-          <li><a href="products.html">Products</a></li>
+          <li><a href="menu.html">Menu</a></li>
+          <li><a href="inventory.html">Log Inventory</a></li>
+          <li><a href="inventorytransaction.html">Exchange Inventory</a></li>
           <li><a href="ordering.html">Ordering</a></li>
         </ul>
       </nav>
 
       <main>
         <div class="flex-container">
-          <label for="stores">Choose a store location:</label>
-          <select name="stores" id="stores">
-            <option value="Main">Mountain Vista</option>
-            <option value="1st">Sunset Rd</option>
-            <option value="Eastern">Eastern Rd</option>
-            <option value="Nellis">Nellis Rd</option>
-            <option value="Boulder">Boulder Hwy</option>
+          <label for="locations">Choose a store location:</label>
+          <select name="locations" id="locations">
+            <option value=1>678 Mountain Vista Ave</option>
+            <option value=2>981 Sunset Rd</option>
+            <option value=3>45 Eastern Rd</option>
           </select>
+          <button id="viewStoreInfoBtn">View Store Info</button>
+        </div>
+        <div id="locationTables">
         </div>
         <img
           src="sandwich.png"
@@ -44,5 +47,198 @@
     <footer>
       <p>Group 14 IFT 402 Fall 2023</p>
     </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var employeesArray1 = [];
+        var employeesArray2 = [];
+        var employeesArray3 = [];
+
+        var transactionsArray1 = [];
+        var transactionsArray2 = [];
+        var transactionsArray3 = [];
+
+        var ordersArray1 = [];
+        var ordersArray2 = [];
+        var ordersArray3 = [];
+
+        var inventoryLogsArray1 = [];
+        var inventoryLogsArray2 = [];
+        var inventoryLogsArray3 = [];
+
+        var inventoryTransactionsArray1 = [];
+        var inventoryTransactionsArray2 = [];
+        var inventoryTransactionsArray3 = [];
+
+        function getCurrentDateAndTimeInPhoenix() {
+          var utcDate = new Date();
+          var phoenixOffset = -7 * 60; // Phoenix is UTC-7
+          var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+
+          var options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+          var formattedDateTime = phoenixTime.toLocaleDateString('en-US', options);
+
+          return formattedDateTime;
+        }
+
+        function getCurrentDateInPhoenix() {
+          var utcDate = new Date();
+          var phoenixOffset = -7 * 60; // Phoenix is UTC-7
+          var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+
+          var options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+          var formattedDate = phoenixTime.toLocaleDateString('en-US', options);
+
+          return formattedDate;
+        }
+
+        function populateArrays(locationID) {
+          // Placeholder data (replace this with actual data from the database)
+          var placeholderData = {
+            employees: { employeeID: (locationID * 100) + 1, firstName: "John", lastName: "Doe", jobRole: "Manager" },
+            transactions: { transactionID: (locationID * 1000) + 1, employeeID: (locationID * 100) + 1, balance: (locationID * 100).toFixed(2), dateAndTime: getCurrentDateAndTimeInPhoenix() },
+            orders: { orderID: (locationID * 100) + 1, username: "user" + locationID, dateAndTime: getCurrentDateAndTimeInPhoenix() },
+            inventoryLogs: { inventoryLogID: (locationID * 100) + 1, dateAndTime: getCurrentDateAndTimeInPhoenix() },
+            inventoryTransactions: { inventoryTransactionID: (locationID * 100) + 1, date: getCurrentDateInPhoenix(), outgoingLocationID: locationID, incomingLocationID: locationID + 1 }
+          };
+
+          switch (locationID) {
+            case 1:
+              employeesArray1.push(placeholderData.employees);
+              transactionsArray1.push(placeholderData.transactions);
+              ordersArray1.push(placeholderData.orders);
+              inventoryLogsArray1.push(placeholderData.inventoryLogs);
+              inventoryTransactionsArray1.push(placeholderData.inventoryTransactions);
+              break;
+            case 2:
+              employeesArray2.push(placeholderData.employees);
+              transactionsArray2.push(placeholderData.transactions);
+              ordersArray2.push(placeholderData.orders);
+              inventoryLogsArray2.push(placeholderData.inventoryLogs);
+              inventoryTransactionsArray2.push(placeholderData.inventoryTransactions);
+              break;
+            case 3:
+              employeesArray3.push(placeholderData.employees);
+              transactionsArray3.push(placeholderData.transactions);
+              ordersArray3.push(placeholderData.orders);
+              inventoryLogsArray3.push(placeholderData.inventoryLogs);
+              inventoryTransactionsArray3.push(placeholderData.inventoryTransactions);
+              break;
+            default:
+              console.log("Invalid locationID");
+          }
+        }
+
+        function generateTables(locationID) {
+          // Clear existing tables
+           document.getElementById("locationTables").innerHTML = "";
+          
+          var tableData = {
+            employees: [],
+            transactions: [],
+            orders: [],
+            inventoryLogs: [],
+            inventoryTransactions: []
+          };
+
+          switch (locationID) {
+            case 1:
+              tableData = {
+                employees: employeesArray1,
+                transactions: transactionsArray1,
+                orders: ordersArray1,
+                inventoryLogs: inventoryLogsArray1,
+                inventoryTransactions: inventoryTransactionsArray1
+              };
+            break;
+            case 2:
+              tableData = {
+                employees: employeesArray2,
+                transactions: transactionsArray2,
+                orders: ordersArray2,
+                inventoryLogs: inventoryLogsArray2,
+                inventoryTransactions: inventoryTransactionsArray2
+              };
+            break;
+            case 3:
+              tableData = {
+                employees: employeesArray3,
+                transactions: transactionsArray3,
+                orders: ordersArray3,
+                inventoryLogs: inventoryLogsArray3,
+                inventoryTransactions: inventoryTransactionsArray3
+                };
+            break;
+            default:
+              console.log("Invalid locationID");
+              return;
+          }
+          
+          for (var key in tableData) {
+            var tableContainer = document.createElement("div");
+
+            var tableTitle = document.createElement("span");
+            tableTitle.textContent = key.charAt(0).toUpperCase() + key.slice(1); // Capitalize the first letter
+            tableContainer.appendChild(tableTitle);
+
+            var table = document.createElement("table");
+            var header = document.createElement("thead");
+            var headerRow = document.createElement("tr");
+
+            var columns;
+            switch (key) {
+              case "employees":
+                columns = ["Employee ID", "First Name", "Last Name", "Job Role"];
+                break;
+              case "transactions":
+                columns = ["Transaction ID", "Employee ID", "Balance", "Date and Time"];
+                break;
+              case "orders":
+                columns = ["Order ID", "Username", "Date and Time"];
+                break;
+              case "inventoryLogs":
+                columns = ["Inventory Log ID", "Date and Time"];
+                break;
+              case "inventoryTransactions":
+                columns = ["Inventory Transaction ID", "Date", "Outgoing Location ID", "Incoming Location ID"];
+                break;
+              default:
+                columns = []; // Empty array for unknown table types
+            }
+
+            columns.forEach(function (column) {
+              var th = document.createElement("th");
+              th.textContent = column;
+              headerRow.appendChild(th);
+            });
+
+            header.appendChild(headerRow);
+            table.appendChild(header);
+
+            tableData[key].forEach(function (data) {
+              var row = document.createElement("tr");
+
+              for (var prop in data) {
+                var cell = document.createElement("td");
+                cell.textContent = data[prop];
+                row.appendChild(cell);
+              }
+
+              table.appendChild(row);
+            });
+
+            tableContainer.appendChild(table);
+            
+            document.getElementById("locationTables").appendChild(tableContainer);
+          }
+        }
+
+        document.getElementById("viewStoreInfoBtn").addEventListener("click", function() {
+          var locationID = parseInt(document.getElementById("locations").value, 10);
+          populateArrays(locationID);
+          generateTables(locationID);
+        });
+      });
+    </script>
   </body>
 </html>

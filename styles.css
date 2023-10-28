@@ -124,7 +124,7 @@ h2 {
   text-align: center;
 }
 form {
-  width: 250px;
+  width: 400px;
   margin: 20px auto;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -181,4 +181,117 @@ img {
   display: block;
   margin: 0 auto;
   padding: 30px;
+}
+
+.delete-button {
+  width: 30px !important;
+  height: 30px !important;
+  background: url('delete-icon.png') no-repeat center center;
+  background-size: cover;
+  border: none !important;
+  cursor: pointer;
+}
+
+.delete-button img {
+  width: 100%;
+  height: 100%;
+}
+
+#ingredients-container div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+#ingredients-container div select {
+  width: 160px;
+  margin-right: 5px;
+}
+
+#ingredients-container div input[type="number"] {
+  width: 60px;
+  font-size: 16px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+#ingredients-container div span {
+  width: 70px;
+}
+
+#ingredients-container div label {
+  margin-right: 5px;
+}
+
+#order-form form {
+  width: 400px;
+}
+
+#locations {
+  width: 215px;
+}
+
+#inventory {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 600px;
+}
+
+#inventory form {
+  width: 450px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+#inventory form label,
+#inventory form input[type="number"],
+#inventory form span {
+  margin-bottom: 20px;
+  flex: 0 0 calc(33.33% - 20px);
+}
+
+#inventory form label {
+  flex: 0 0 150px;
+  margin-right: 10px;
+}
+
+#inventory form input[type="number"] {
+  width: 70px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+table {
+  margin-bottom: 10px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+#locationTables {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px; /* Add some top margin for spacing */
+}
+
+#locationTables > div > span {
+  font-weight: bold;
+  margin-bottom: 10px;
 }
