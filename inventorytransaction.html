@@ -157,9 +157,9 @@
 
           if (ingredientSelect && quantityInput) {
             var ingredientObject = {
-              orderID: 0, // Default order ID
+              inventoryTransactionID : 0, // Default order ID
               ingredientID: parseInt(ingredientSelect.value),
-              quantity: parseInt(quantityInput.value) * 16 // Multiply by 16
+              quantity: parseInt(quantityInput.value)
             };
 
             ingredientObjects.push(ingredientObject);
