@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="login.css" />
+    <title>User Login</title>
+  </head>
+  <body>
+    <div class="login-container">
+      <div id="register-successful">
+      </div>
+      <div class="logo-container">
+        <img src="Lunch_Rush_3.png" alt="Lunch Rush logo" />
+      </div>
+      <form class="login-form" id="login-form" onsubmit="handleLogin(event)">
+        <input type="text" placeholder="Username" id="username" required />
+        <input type="password" placeholder="Password" id="password" required />
+        <button type="submit" class="login-button">Login</button>
+      </form>
+      <a href="account-creation.html" class="account-creation-link"
+        >Create an Account</a
+      >
+    </div>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const message = urlParams.get('message');
+
+      const registerSuccessfulDiv = document.getElementById('register-successful');
+      if (message) {
+        registerSuccessfulDiv.innerHTML = `<p>${message}</p>`;
+        registerSuccessfulDiv.style.display = 'block';
+      }
+    });
+
+    async function handleLogin(event) {
+      event.preventDefault(); // Prevent the default form submission behavior
+
+      try {
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+
+          console.log('Username: ', username);
+          console.log('Password: ', password);
+
+          const response = await fetch('/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  username: username,
+                  password: password,
+              }),
+          });
+
+          if (!response.ok) {
+              const errorMessage = await response.text();
+              alert(errorMessage);
+              return;
+          }
+
+          const result = await response.json();
+          console.log('Login Successful. Token:', result.token);
+        
+          if (result.redirect) {
+              window.location.href = result.redirect;
+          }
+
+      } catch (error) {
+          console.error('Error in handleLogin:', error.message || error);
+          alert('An error occurred. Please try again.'); // Alert the user about the error
+      }
+    }
+  </script>
+</html>

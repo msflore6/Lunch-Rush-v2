@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lunch Rush Database</title>
+    <link href="styles.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="images\favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="images\favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <header>
+      <div id="header-image">
+        <img src="Lunch_Rush_3.png" />
+      </div>
+    </header>
+    <div id="grid-container">
+      <nav>
+        <ul>
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/stores.html">Stores</a></li>
+          <li><a href="/menu.html">Menu</a></li>
+          <li><a href="/inventory.html">Log Inventory</a></li>
+          <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
+          <li><a href="/ordering.html">Ordering</a></li>
+        </ul>
+      </nav>
+      <main>
+        <div class="flex-container">
+          <div class="flex3">
+            <label for="stores">Record an Inventory Log:</label>
+              <div id="inventory">
+                <form>
+                  <label for=ingredient1>Bread Rolls</label>
+                  <input type="number" id="ingredient1" name="ingredient1" required=true value="0" min="0">
+                  <span>rolls</span><br>
+                  <label for=ingredient2>Mayonnaise</label>
+                  <input type="number" id="ingredient2" name="ingredient2" required=true value="0" min="0">
+                  <span>fl oz</span><br>
+                  <label for=ingredient3>Mustard</label>
+                  <input type="number" id="ingredient3" name="ingredient3" required=true value="0" min="0">
+                  <span>fl oz</span><br>
+                  <label for=ingredient4>Ranch Dressing</label>
+                  <input type="number" id="ingredient4" name="ingredient4" required=true value="0" min="0">
+                  <span>fl oz</span><br>
+                  <label for=ingredient5>Sliced Turkey</label>
+                  <input type="number" id="ingredient5" name="ingredient5" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <label for=ingredient6>Sliced Ham</label>
+                  <input type="number" id="ingredient6" name="ingredient6" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <label for=ingredient7>Rotissere Chicken</label>
+                  <input type="number" id="ingredient7" name="ingredient7" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <label for=ingredient8>Bacon</label>
+                  <input type="number" id="ingredient8" name="ingredient8" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <label for=ingredient9>Cheese</label>
+                  <input type="number" id="ingredient9" name="ingredient9" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <label for=ingredient10>Lettuce</label>
+                  <input type="number" id="ingredient10" name="ingredient10" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <label for=ingredient11>Tomato</label>
+                  <input type="number" id="ingredient11" name="ingredient11" required=true value="0" min="0">
+                  <span>oz</span><br>
+                  <input type="submit" value="Log Inventory" />
+                </form>
+              </div>
+          </div>
+        </div>
+        <img src="sandwich1.gif" alt="a cartoon sub sandwich" class="center" />
+      </main>
+      <footer>
+        <p>Group 14 IFT 402 Fall 2023</p>
+      </footer>
+
+      <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/dist/index.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          var form = document.querySelector("form");
+  
+          form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const decodedToken = jwt_decode(token);
+            console.log(decodedToken);
+
+            const userLocationID = decodedToken.locationID;
+            console.log('User Location ID:', userLocationID);
+  
+            var inventoryLogObject = {
+              inventoryLogID: 0, // Default inventoryLogID
+              locationID: userLocationID, // Default location ID
+              dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " ")
+            };
+  
+            var ingredients = [];
+  
+            for (var i = 1; i <= 11; i++) {
+              var ingredientID = i;
+              var inputID = "ingredient" + i; // Assuming input IDs are like "ingredient1", "ingredient2", etc.
+              var quantity = parseInt(document.getElementById(inputID).value);
+  
+              var ingredientObject = {
+                inventoryLogID: 0, // Default inventoryLogID
+                ingredientID: ingredientID,
+                quantity: quantity
+              };
+  
+              ingredients.push(ingredientObject);
+            }
+  
+            console.log("Inventory Log Object: ", inventoryLogObject);
+            console.log("Ingredient Objects: ", ingredients);
+          });
+  
+          function getCurrentTimeInPhoenix() {
+            var utcDate = new Date();
+            var phoenixOffset = -7 * 60; // Phoenix is UTC-7
+            var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+  
+            return phoenixTime;
+          }
+        });
+      </script>
+    </div>
+  </body>
+</html>

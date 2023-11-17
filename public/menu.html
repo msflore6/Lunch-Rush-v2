@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lunch Rush Database</title>
+    <link href="styles.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="images\favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="images\favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <header>
+      <div id="header-image">
+        <img src="Lunch_Rush_3.png" />
+      </div>
+    </header>
+    <div id="grid-container">
+      <nav>
+        <ul>
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/stores.html">Stores</a></li>
+          <li><a href="/menu.html">Menu</a></li>
+          <li><a href="/inventory.html">Log Inventory</a></li>
+          <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
+          <li><a href="/ordering.html">Ordering</a></li>
+        </ul>
+      </nav>
+      <main>
+        <div class="flex-container">
+          <div class="flex3">
+            <label for="stores">Choose a Menu Item:</label>
+            <select name="product" id="product">
+              <option value=1>Turkey Club Sub</option>
+              <option value=2>BLT Sub</option>
+              <option value=3>Chicken Bacon Ranch Sub</option>
+              <option value=4>Ham & Cheese Sub</option>
+              <option value=5>Classic Club Sub</option>
+            </select>
+            <button id="viewIngredientsBtn">View Menu Item Ingredients</button>
+            <button id="viewItemCostBtn">View Item Cost</button>
+          </div>
+        </div>
+        <div id="ingredientsTableContainer"></div>
+        <span id="itemCostSpan"></span>
+        <span id="itemPriceSpan"></span>
+        <img src="sandwich1.gif" alt="a cartoon sub sandwich" class="center" />
+      </main>
+      <footer>
+        <p>Group 14 IFT 402 Fall 2023</p>
+      </footer>
+    </div>
+  </body>
+  <script>
+    document.getElementById("viewIngredientsBtn").addEventListener("click", async function () {
+      const menuItemID = document.getElementById("product").value;
+      await fetchIngredients(menuItemID);
+    });
+
+    document.getElementById("viewItemCostBtn").addEventListener("click", async function () {
+      const menuItemID = document.getElementById("product").value;
+      await calculateItemCost(menuItemID);
+    });
+
+    async function fetchIngredients(menuItemID) {
+      try {
+        const response = await fetch(`/api/menuItems/menuItems/ingredients/${menuItemID}`);
+        const ingredients = await response.json();
+        generateIngredientsTable(ingredients);
+      } catch (error) {
+        console.error('Error fetching ingredients:', error);
+      }
+    }
+
+    async function calculateItemCost(menuItemID) {
+      try {
+        const ingredientsResponse = await fetch(`/api/menuItems/menuItems/ingredients/${menuItemID}`);
+        const ingredients = await ingredientsResponse.json();
+
+        const menuItemResponse = await fetch(`/api/menuItems/menuItems/${menuItemID}`)
+        const menuItem = await menuItemResponse.json();
+
+        document.getElementById("ingredientsTableContainer").innerHTML = ""; // Clear ingredients table
+        document.getElementById("itemCostSpan").innerHTML = ""; // Clear item cost
+        document.getElementById("itemPriceSpan").innerHTML = ""; // Clear item price
+
+        let itemCost = 0;
+        const itemPrice = menuItem[0].price;
+        console.log('Item price: ', itemPrice)
+
+        ingredients.forEach(function (ingredient) {
+          itemCost += ingredient.quantity * ingredient.costPerUnit;
+        });
+
+        document.getElementById("itemCostSpan").textContent = `Item Cost: $${itemCost.toFixed(2)}`;
+        document.getElementById("itemPriceSpan").textContent = `Item Price: $${itemPrice.toFixed(2)}`;
+      } catch (error) {
+        console.error('Error calculating item cost:', error);
+      }
+    }
+
+    function generateIngredientsTable(ingredients) {
+      const ingredientsTableContainer = document.getElementById("ingredientsTableContainer");
+      ingredientsTableContainer.innerHTML = "";
+      document.getElementById("itemCostSpan").innerHTML = ""; // Clear item cost
+      document.getElementById("itemPriceSpan").innerHTML = ""; // Clear item price
+
+      const table = document.createElement("table");
+      const headerRow = document.createElement("tr");
+
+      for (const prop in ingredients[0]) {
+        const th = document.createElement("th");
+        const formattedHeader = prop.replace(/([a-z])([A-Z])/g, '$1 $2'); // Add line breaks between words
+        th.innerHTML = formattedHeader.charAt(0).toUpperCase() + formattedHeader.slice(1); // Capitalize the first letter
+        headerRow.appendChild(th);
+      }
+
+      table.appendChild(headerRow);
+
+      // Create a row for each ingredient
+      ingredients.forEach(function (ingredient) {
+        const row = document.createElement("tr");
+
+        for (const prop in ingredient) {
+          const cell = document.createElement("td");
+          cell.textContent = ingredient[prop];
+          row.appendChild(cell);
+        }
+
+        table.appendChild(row);
+      });
+
+      ingredientsTableContainer.appendChild(table);
+    }
+
+
+  </script>
+</html>
