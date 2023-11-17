@@ -1,4 +1,4 @@
-const db = require('../dbConnection.js');
+const db = require('../middleware/dbConnection.js');
 
 exports.getMenuItemByID = (req, res) => {
     const menuItemID = req.params.menuItemID;

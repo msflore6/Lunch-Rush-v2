@@ -1,4 +1,4 @@
-const db = require('../dbConnection.js');
+const db = require('../middleware/dbConnection.js');
 
 exports.getAllIngredients = (req, res) => {
     const query = `SELECT * FROM Ingredients`;

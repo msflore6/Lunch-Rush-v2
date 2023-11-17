@@ -1,4 +1,4 @@
-const db = require('../dbConnection.js');
+const db = require('../middleware/dbConnection.js');
 
 exports.getTransactionsByLocation = (req, res) => {
     const locationID = req.params.locationID;
