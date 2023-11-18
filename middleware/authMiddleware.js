@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const secretKey = 'process.env.SECRET_KEY';
+const secretKey = process.env.SECRET_KEY;
 
 const authenticateJWT = (req, res, next) => {
-  const token = req.header('Authorization');
+  const token = req.cookies['authToken'];
 
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    const redirectUrl = '/login.html?message=' + encodeURIComponent('You must be logged in to access this page.');
+    return res.redirect(redirectUrl);
   }
 
   jwt.verify(token, secretKey, (err, user) => {
@@ -16,6 +17,11 @@ const authenticateJWT = (req, res, next) => {
     }
 
     req.user = user;
+
+    if (req.originalUrl.includes('/login.html') || req.originalUrl.includes('/account-creation.html')) {
+      return res.redirect('/index.html');
+    }
+
     next();
   });
 };

@@ -30,6 +30,7 @@
             <label for="stores">Record an Inventory Log:</label>
               <div id="inventory">
                 <form>
+                  <div class="result-message" id="result-message"></div>
                   <label for=ingredient1>Bread Rolls</label>
                   <input type="number" id="ingredient1" name="ingredient1" required=true value="0" min="0">
                   <span>rolls</span><br>
@@ -74,51 +75,93 @@
         <p>Group 14 IFT 402 Fall 2023</p>
       </footer>
 
-      <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/dist/index.js"></script>
       <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
           var form = document.querySelector("form");
-  
-          form.addEventListener("submit", function(event) {
+          var resultMessage = document.getElementById("result-message")
+
+          form.addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            const decodedToken = jwt_decode(token);
-            console.log(decodedToken);
+            try {
+              // Get user info
+              const userInfoResponse = await fetch('/api/users/userInfo');
+              const userInfo = await userInfoResponse.json();
 
-            const userLocationID = decodedToken.locationID;
-            console.log('User Location ID:', userLocationID);
-  
-            var inventoryLogObject = {
-              inventoryLogID: 0, // Default inventoryLogID
-              locationID: userLocationID, // Default location ID
-              dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " ")
-            };
-  
-            var ingredients = [];
-  
-            for (var i = 1; i <= 11; i++) {
-              var ingredientID = i;
-              var inputID = "ingredient" + i; // Assuming input IDs are like "ingredient1", "ingredient2", etc.
-              var quantity = parseInt(document.getElementById(inputID).value);
-  
-              var ingredientObject = {
-                inventoryLogID: 0, // Default inventoryLogID
-                ingredientID: ingredientID,
-                quantity: quantity
+              // Get the latest inventory log ID
+              const latestLogIDResponse = await fetch(`/api/inventoryLogs/inventoryLogs/latestID/${userInfo.locationID}`);
+              const latestLogIDData = await latestLogIDResponse.json();
+              const latestLogID = latestLogIDData[0].inventoryLogID;
+
+              // Prepare data for inventory log
+              const inventoryLogObject = {
+                inventoryLogID: latestLogID + 1,
+                locationID: userInfo.locationID,
+                dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "),
               };
-  
-              ingredients.push(ingredientObject);
+
+              // Prepare data for inventory log line items
+              const ingredients = [];
+              for (let i = 1; i <= 11; i++) {
+                const inputID = "ingredient" + i;
+                const quantity = parseInt(document.getElementById(inputID).value);
+
+                const ingredientObject = {
+                  inventoryLogID: inventoryLogObject.inventoryLogID,
+                  ingredientID: i,
+                  quantity: quantity,
+                };
+
+                ingredients.push(ingredientObject);
+              }
+
+              // Post inventory log
+              const postLogResponse = await fetch(`/api/inventoryLogs/inventoryLogs`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(inventoryLogObject),
+              });
+
+              // Post inventory log line items
+              for (const ingredientObject of ingredients) {
+                try {
+                  const postLineItemsResponse = await fetch(`/api/inventoryLogs/inventoryLogs/lineItems`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ingredientObject),
+                  });
+
+                  const result = await postLineItemsResponse.json();
+                } catch (error) {
+                  console.error('Error posting line item:', error);
+                  setResultMessage('An error occurred. Please try again later.', 'error');
+                  return;
+                }
+              }
+              
+              setResultMessage('The inventory log was saved successfully.', 'success');
+
+            } catch (error) {
+              console.error('Error:', error);
+              setResultMessage('An error occurred. Please try again later.', 'error');
             }
-  
-            console.log("Inventory Log Object: ", inventoryLogObject);
-            console.log("Ingredient Objects: ", ingredients);
           });
-  
+
+          function setResultMessage(message, messageType) {
+            resultMessage.innerText = message;
+            resultMessage.style.display = 'block';
+            resultMessage.className = messageType;
+          }
+
           function getCurrentTimeInPhoenix() {
             var utcDate = new Date();
             var phoenixOffset = -7 * 60; // Phoenix is UTC-7
             var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
-  
+
             return phoenixTime;
           }
         });

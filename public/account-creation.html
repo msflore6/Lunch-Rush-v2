@@ -9,23 +9,6 @@
   <body>
     <div class="registration-container">
       <h2 class="registration-heading">Account Creation</h2>
-      <div class="profile-picture-container">
-        <img
-          src="default-profile.png"
-          alt="Profile Picture"
-          id="profile-picture"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          id="profile-picture-upload"
-          class="profile-picture-upload"
-          onchange="loadProfilePicture(event)"
-        />
-        <label for="profile-picture-upload" class="profile-picture-label"
-          >Change Profile Picture</label
-        >
-      </div>
       <form class="registration-form" action="/registration" method="post">
         <input
           type="text"

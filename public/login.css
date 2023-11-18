@@ -57,6 +57,7 @@ a:hover {
 }
 .registration-container {
   text-align: center;
+  color: #ffffff;
   background-color: #80061c;
   border-radius: 10px;
   padding: 20px;
@@ -64,6 +65,7 @@ a:hover {
 }
 .registration-heading {
   margin-top: 0;
+  color: #ffffff;
 }
 .profile-picture-container {
   position: relative;
@@ -132,10 +134,12 @@ a:hover {
   background-color: #989898;
 }
 
-#register-successful {
+#message-window {
   display: none;
   border: 1px solid #ffffff;
   border-radius: 10px;
   padding: 10px;
   color: #ffffff
 }
+
+

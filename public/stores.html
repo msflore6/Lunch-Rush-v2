@@ -212,8 +212,6 @@
 
         const lineItems = await lineItemsPromise;
 
-        console.log("Line Items: ", lineItems)
-
         if (Array.isArray(lineItems)) {
           const lineItemsTable = generateLineItemsTable(lineItems);
           lineItemsTable.id = "lineItemsTable";
@@ -251,15 +249,11 @@
       }
 
       async function fetchLineItems(id, key) {
-        console.log("ID: ", id);
-        console.log("Key: ", key);
         const response = await fetch(`/api/${key}/${key}/lineItems/${id}`);
         return response.json();
       }
 
       function generateLineItemsTable(lineItems) {
-        console.log(lineItems);
-
         var table = document.createElement("table");
         var headerRow = document.createElement("tr");
 

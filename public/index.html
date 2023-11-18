@@ -26,11 +26,7 @@
         </ul>
       </nav>
       <main>
-        <p>
-          Welcome to the Lunch Rush ordering site where you can search and
-          request any items needed or list up items you have available for
-          requests.
-        </p>
+        <span id="welcomeMessage"></span>
         <img
           src="sandwich.png"
           alt="a cartoon cold cuts sandwich"
@@ -42,4 +38,13 @@
       <p>Group 14 IFT 402 Fall 2023</p>
     </footer>
   </body>
+  <script>
+    fetch('/api/users/userInfo')
+      .then(response => response.json())
+      .then(userInfo => {
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        welcomeMessage.innerHTML = `Welcome ${userInfo.firstName} ${userInfo.lastName}!`;
+      })
+      .catch(error => console.error('Error fetching user info:', error));
+  </script>
 </html>

@@ -296,10 +296,54 @@ th {
   margin-bottom: 10px;
 }
 
-#itemCostSpan, #itemPriceSpan {
+#itemCostSpan, #itemPriceSpan, #welcomeMessage {
   display: flex;
   justify-content: center;
   margin-top: 20px; /* Adjust this margin as needed */
   font-size: 18px; /* Adjust the font size as needed */
   font-weight: bold;
+}
+
+.result-message {
+  display: none;
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+  color: #ffffff
+}
+
+#incoming {
+  margin-bottom: 10px;
+}
+
+.submit-button{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.form-input-box{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.ingredient-dropdown{
+  width: 245px !important;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  margin-left: 3px;
+  margin-right: 10px;
+}
+
+.dynamic-ingredient-form{
+  width: 500px
+}
+
+.quantity-label{
+  margin-left: 10px;
+}
+
+.location-selector{
+  margin-top: 5px;
 }

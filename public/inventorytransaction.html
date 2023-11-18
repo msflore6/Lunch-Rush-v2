@@ -27,18 +27,23 @@
       <main>
         <h2>Inventory Transaction Form</h2>
         <section id="form">
-          <form id="inventory-transaction-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
-            <div id="ingredients-container">
+          <form id="inventory-transaction-form" class="dynamic-ingredient-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
+						<div class="result-message" id="result-message"></div>
+						<div id="ingredients-container">
               <!-- Ingredient input sections will be dynamically added here -->
             </div>
-            <button type="button" id="add-ingredient-btn">Add Ingredient...</button>
-            <span>Location ID:</span>
-            <input type="number" id="location" name="location" required="true" min="1" max="3">
+            <button type="button" id="add-ingredient-btn" class="submit-button">Add Ingredient...</button>
+            <span>Location:</span>
+            <select name="locations" id="locations" class="location-selector">
+							<option value=1>678 Mountain Vista Ave</option>
+							<option value=2>981 Sunset Rd</option>
+							<option value=3>45 Eastern Rd</option>
+						</select>
             <label for="outgoing">Outgoing Location</label>
             <input type="radio" id="outgoing" name="locationType" value="outgoing">
             <label for="incoming">Incoming Location</label>
             <input type="radio" id="incoming" name="locationType" value="incoming">
-            <input type="submit" value="Log Inventory Transaction" />
+            <input type="submit" value="Log Inventory Transaction" class="submit-button"/>
           </form>
         </section>
       </main>
@@ -47,12 +52,11 @@
       <p>Group 14 IFT 402 Fall 2023</p>
     </footer>
   
-    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/dist/index.js"></script>
     <script>
       var inventoryTransactionForm = document.getElementById("inventory-transaction-form");
       var ingredientsContainer = document.getElementById("ingredients-container");
       var addIngredientButton = document.getElementById("add-ingredient-btn");
-      var ingredientCounter = 0;
+      var ingredientCounter = 1;
       var deleteButton = null;
   
       addIngredientButton.addEventListener("click", createIngredientSection);
@@ -62,14 +66,16 @@
         var select = document.createElement("select");
         var quantityInput = document.createElement("input");
         var measurementUnit = document.createElement("span");
+        var quantityLabel = document.createElement("span");
   
         div.className = "ingredient-section";
         select.id = "ingredient-" + ingredientCounter;
         select.name = "ingredient-" + ingredientCounter;
-        select.style.width = "165px";
-        quantityInput.style.marginRight = "5px";
-
-
+        select.className = "ingredient-dropdown";
+				quantityInput.id = "quantity-" + ingredientCounter;
+        quantityInput.className = "form-input-box";
+        quantityLabel.className = "quantity-label";
+        quantityLabel.textContent = "Quantity: ";
 
         var ingredientOptions = [
           "Bread Rolls",
@@ -104,21 +110,18 @@
         measurementUnit.id = "measurementUnit-" + ingredientCounter;
         measurementUnit.textContent = "Rolls";
   
-        if (ingredientCounter > 0) {
+        if (ingredientCounter > 1) {
           deleteButton = document.createElement("button");
           deleteButton.type = "button";
           deleteButton.className = "delete-button";
           deleteButton.addEventListener("click", function() {
             ingredientsContainer.removeChild(div);
+						ingredientCounter--;
           });
-          //var deleteIcon = document.createElement("img");
-          //deleteIcon.src = "delete-icon.png";
-          //deleteIcon.alt = "Delete";
-          //deleteButton.appendChild(deleteIcon);
         }
   
         div.appendChild(select);
-        div.appendChild(document.createTextNode("Quantity: "));
+        div.appendChild(quantityLabel);
         div.appendChild(quantityInput);
         div.appendChild(measurementUnit);
         
@@ -148,65 +151,123 @@
   
       createIngredientSection();
 
-      inventoryTransactionForm.addEventListener("submit", function(event) {
-        event.preventDefault();
+			document.addEventListener("DOMContentLoaded", function () {
+        var form = document.querySelector("form");
+        var resultMessage = document.getElementById("result-message")
 
-        var ingredientObjects = [];
-        for (var i = 0; i < ingredientCounter; i++) {
-          var ingredientSelect = document.getElementById("ingredient-" + i);
-          var quantityInput = document.getElementsByName("quantity-" + i)[0];
+				form.addEventListener("submit", async function (event) {
+					event.preventDefault();
 
-          if (ingredientSelect && quantityInput) {
-            var ingredientObject = {
-              inventoryTransactionID : 0, // Default order ID
-              ingredientID: parseInt(ingredientSelect.value),
-              quantity: parseInt(quantityInput.value)
-            };
+					try {
+						// Get user info
+						const userInfoResponse = await fetch('/api/users/userInfo');
+						const userInfo = await userInfoResponse.json();
 
-            ingredientObjects.push(ingredientObject);
-          }
-        }
+						const outgoingRadio = document.getElementById("outgoing");
+   					const incomingRadio = document.getElementById("incoming");
 
-        function getCurrentDateInPhoenix() {
-            var utcDate = new Date();
-            var phoenixOffset = -7 * 60; // Phoenix is UTC-7
-            var phoenixDate = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+						if (!outgoingRadio.checked && !incomingRadio.checked) {
+								setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
+								return;
+						}
 
-            // Get the date in YYYY-MM-DD format
-            var formattedDate = phoenixDate.toISOString().split('T')[0];
-            return formattedDate;
-        }
+						const selectedLocationID = parseInt(document.getElementById("locations").value, 10);
 
-        var outgoingRadio = document.getElementById("outgoing");
-        var incomingRadio = document.getElementById("incoming");
-        var locationInput = document.getElementById("location");
+						if (selectedLocationID === userInfo.locationID) {
+							setResultMessage("The location you've selected is the same as your own location. Please choose a different location.", 'error');
+							return;
+						}
 
-        const decodedToken = jwt_decode(token);
-        console.log(decodedToken);
+						// Get the latest inventory transaction ID
+						let outgoingLocationID, incomingLocationID;
+						if (outgoingRadio.checked) {
+							outgoingLocationID = selectedLocationID;
+							incomingLocationID = userInfo.locationID;
+						} else if (incomingRadio.checked) {
+							outgoingLocationID = userInfo.locationID;
+							incomingLocationID = selectedLocationID;
+						}
 
-        const userLocationID = decodedToken.locationID;
-        console.log('User Location ID:', userLocationID);
+						const latestTransactionIDResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/latestID/${outgoingLocationID}`);
+						const latestTransactionIDData = await latestTransactionIDResponse.json();
+						const latestTransactionID = latestTransactionIDData[0].inventoryTransactionID;
 
-        var outgoingLocationID = userLocationID; //default value
-        var incomingLocationID = userLocationID; //default value
+						// Prepare data for inventory transaction
+						const inventoryTransactionObject = {
+							inventoryTransactionID: latestTransactionID + 1,
+							outgoingLocationID: outgoingLocationID,
+							incomingLocationID: incomingLocationID,
+							date: getCurrentDateInPhoenix(),
+						};
 
-        if (outgoingRadio.checked) {
-        outgoingLocationID = parseInt(locationInput.value);
-        } else if (incomingRadio.checked) {
-        incomingLocationID = parseInt(locationInput.value);
-        }
+						// Prepare data for inventory transaction line items
+						const ingredients = [];
+						for (let i = 1; i < ingredientCounter; i++) {
+							const ingredientID = parseInt(document.getElementById(`ingredient-${i}`).value);
+							const inputID = "ingredient-" + i;
+							const quantity = parseInt(document.getElementById(`quantity-${i}`).value);
 
-        var inventoryTransactionObject = {
-            inventoryTransactionID: 0, // Default inventoryTransaction ID
-            date: getCurrentDateInPhoenix(),
-            incomingLocationID: incomingLocationID,
-            outgoingLocationID: outgoingLocationID
-        };
+							const ingredientObject = {
+								inventoryTransactionID: inventoryTransactionObject.inventoryTransactionID,
+								ingredientID: ingredientID,
+								quantity: quantity,
+							};
 
-        console.log("inventoryTransaction Object:", inventoryTransactionObject);
-        console.log("Ingredient Objects:", ingredientObjects);
-      });
+							ingredients.push(ingredientObject);
+						}
 
+						// Post inventory transaction
+						const postTransactionResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(inventoryTransactionObject),
+						});
+
+						// Post inventory transaction line items
+						for (const ingredientObject of ingredients) {
+							try {
+								const postLineItemsResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/lineItems`, {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+									},
+									body: JSON.stringify(ingredientObject),
+								});
+
+								const result = await postLineItemsResponse.json();
+							} catch (error) {
+								console.error('Error posting line item:', error);
+								setResultMessage('An error occurred. Please try again later.', 'error');
+								return;
+							}
+						}
+								
+						setResultMessage('The inventory transaction was saved successfully.', 'success');
+
+						} catch (error) {
+							console.error('Error:', error);
+								setResultMessage('An error occurred. Please try again later.', 'error');
+						}
+				});
+
+				function setResultMessage(message, messageType) {
+					resultMessage.innerText = message;
+					resultMessage.style.display = 'block';
+					resultMessage.className = messageType;
+				}
+
+				function getCurrentDateInPhoenix() {
+							var utcDate = new Date();
+							var phoenixOffset = -7 * 60; // Phoenix is UTC-7
+							var phoenixDate = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+
+							// Get the date in YYYY-MM-DD format
+							var formattedDate = phoenixDate.toISOString().split('T')[0];
+							return formattedDate;
+				}
+			});
     </script>
   </body>
 </html>
