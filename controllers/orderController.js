@@ -51,7 +51,7 @@ exports.postOrder = (req, res) => {
     INSERT INTO Orders
       (orderID, username, locationID, dateAndTime)
     VALUES
-      (${orderID}, ${username}, ${locationID}, '${dateAndTime}')
+      (${orderID}, '${username}', ${locationID}, '${dateAndTime}')
   `;
   db.query(query, (err, results) => {
     if (err) {

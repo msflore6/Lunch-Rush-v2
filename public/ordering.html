@@ -4,8 +4,6 @@
     <meta charset="utf-8" />
     <title>Lunch Rush Database</title>
     <link href="styles.css" rel="stylesheet" />
-    <link rel="shortcut icon" href="images\favicon.ico" type="image/x-icon" />
-    <link rel="icon" href="images\favicon.ico" type="image/x-icon" />
   </head>
   <body>
     <header>
@@ -22,16 +20,18 @@
           <li><a href="/inventory.html">Log Inventory</a></li>
           <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
           <li><a href="/ordering.html">Ordering</a></li>
+          <li><a href="/reporting-analytics.html">Reporting &<br>Analytics</a></li>
         </ul>
       </nav>
       <main>
         <h2>Ordering Form</h2>
         <section id="form">
-          <form id="order-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
+          <form id="order-form" class="dynamic-ingredient-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
+            <div class="result-message" id="result-message"></div>
             <div id="ingredients-container">
               <!-- Ingredient input sections will be dynamically added here -->
             </div>
-            <button type="button" id="add-ingredient-btn">Add Ingredient...</button>
+            <button type="button" id="add-ingredient-btn" class="submit-button">Add Ingredient...</button>
             <input type="submit" value="Place Order" />
           </form>
         </section>
@@ -40,13 +40,11 @@
     <footer>
       <p>Group 14 IFT 402 Fall 2023</p>
     </footer>
-  
-    <script src="/middleware/jwtUtils.js"></script>
     <script>
       var orderForm = document.getElementById("order-form");
       var ingredientsContainer = document.getElementById("ingredients-container");
       var addIngredientButton = document.getElementById("add-ingredient-btn");
-      var ingredientCounter = 0;
+      var ingredientCounter = 1;
       var deleteButton = null;
   
       addIngredientButton.addEventListener("click", createIngredientSection);
@@ -56,14 +54,16 @@
         var select = document.createElement("select");
         var quantityInput = document.createElement("input");
         var measurementUnit = document.createElement("span");
+        var quantityLabel = document.createElement("span");
   
         div.className = "ingredient-section";
         select.id = "ingredient-" + ingredientCounter;
         select.name = "ingredient-" + ingredientCounter;
-        select.style.width = "165px";
-        quantityInput.style.marginRight = "5px";
-
-
+        select.className = "ingredient-dropdown";
+				quantityInput.id = "quantity-" + ingredientCounter;
+        quantityInput.className = "form-input-box";
+        quantityLabel.className = "quantity-label";
+        quantityLabel.textContent = "Quantity: ";
 
         var ingredientOptions = [
           "Bread Rolls",
@@ -99,21 +99,18 @@
         measurementUnit.id = "measurementUnit-" + ingredientCounter;
         measurementUnit.textContent = "Bags";
   
-        if (ingredientCounter > 0) {
+        if (ingredientCounter > 1) {
           deleteButton = document.createElement("button");
           deleteButton.type = "button";
           deleteButton.className = "delete-button";
           deleteButton.addEventListener("click", function() {
-            ingredientsContainer.removeChild(div);    
+            ingredientsContainer.removeChild(div);
+            ingredientCounter--;    
           });
-          //var deleteIcon = document.createElement("img");
-          //deleteIcon.src = "delete-icon.png";
-          //deleteIcon.alt = "Delete";
-          //deleteButton.appendChild(deleteIcon);
         }
   
         div.appendChild(select);
-        div.appendChild(document.createTextNode("Quantity: "));
+        div.appendChild(quantityLabel);
         div.appendChild(quantityInput);
         div.appendChild(measurementUnit);
         
@@ -143,51 +140,103 @@
   
       createIngredientSection();
 
-      orderForm.addEventListener("submit", function(event) {
-        event.preventDefault();
+      document.addEventListener("DOMContentLoaded", function () {
+        var form = document.querySelector("form");
+        var resultMessage = document.getElementById("result-message")
 
-        var ingredientObjects = [];
-        for (var i = 0; i < ingredientCounter; i++) {
-          var ingredientSelect = document.getElementById("ingredient-" + i);
-          var quantityInput = document.getElementsByName("quantity-" + i)[0];
+				form.addEventListener("submit", async function (event) {
+					event.preventDefault();
 
-          if (ingredientSelect && quantityInput) {
-            var ingredientObject = {
-              orderID: 0, // Default order ID
-              ingredientID: parseInt(ingredientSelect.value),
-              quantity: parseInt(quantityInput.value) * 16 // Multiply by 16
-            };
+					try {
+						// Get user info
+						const userInfoResponse = await fetch('/api/users/userInfo');
+						const userInfo = await userInfoResponse.json();
 
-            ingredientObjects.push(ingredientObject);
-          }
+						const locationID = userInfo.locationID;
+            const username = userInfo.username;
+
+						const latestOrderIDResponse = await fetch(`/api/orders/orders/latestID/${locationID}`);
+						const latestOrderIDData = await latestOrderIDResponse.json();
+						const latestOrderID = latestOrderIDData[0].orderID;
+
+						// Prepare data for order
+						const orderObject = {
+							orderID: latestOrderID + 1,
+							username: username,
+							locationID: locationID,
+							dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "),
+						};
+
+						// Prepare data for order line items
+						const ingredients = [];
+						for (let i = 1; i < ingredientCounter; i++) {
+							const ingredientID = parseInt(document.getElementById(`ingredient-${i}`).value);
+							const inputID = "ingredient-" + i;
+							const quantity = parseInt(document.getElementById(`quantity-${i}`).value);
+
+							const ingredientObject = {
+								orderID: orderObject.orderID,
+								ingredientID: ingredientID,
+								quantity: quantity * 16,
+							};
+
+							ingredients.push(ingredientObject);
+						}
+
+						// Post order
+						const postOrderResponse = await fetch(`/api/orders/orders`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(orderObject),
+						});
+
+						// Post order line items
+						for (const ingredientObject of ingredients) {
+							try {
+								const postLineItemsResponse = await fetch(`/api/orders/orders/lineItems`, {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+									},
+									body: JSON.stringify(ingredientObject),
+								});
+
+								const result = await postLineItemsResponse.json();
+							} catch (error) {
+								console.error('Error posting line item:', error);
+								setResultMessage('An error occurred. Please try again later.', 'error');
+								return;
+							}
+						}
+								
+						setResultMessage('The order was saved successfully.', 'success');
+
+						} catch (error) {
+							console.error('Error:', error);
+							setResultMessage('An error occurred. Please try again later.', 'error');
+						}
+				});
+
+				function setResultMessage(message, messageType) {
+					resultMessage.innerText = message;
+					resultMessage.style.display = 'block';
+					resultMessage.className = messageType;
+				}
+
+				function getCurrentTimeInPhoenix() {
+          // Get the current date and time in UTC
+          var utcDate = new Date();
+
+          // Adjust the UTC time to Phoenix time
+          var phoenixOffset = -7 * 60; // Phoenix is UTC-7
+          var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
+
+          return phoenixTime;
         }
-
-        function getCurrentTimeInPhoenix() {
-            // Get the current date and time in UTC
-            var utcDate = new Date();
-
-            // Adjust the UTC time to Phoenix time
-            var phoenixOffset = -7 * 60; // Phoenix is UTC-7
-            var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
-
-            return phoenixTime;
-        }
-
-        const userLocationID = getLocationID(token);
-        console.log('User Location ID:', userLocationID);
-
-        var orderObject = {
-            orderID: 0, // Default order ID
-            username: "noUser", // Default username
-            locationID: userLocationID,
-            dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " ")
-        };
-
-
-        console.log("Order Object:", orderObject);
-        console.log("Ingredient Objects:", ingredientObjects);
-      });
-
+			});
+      
     </script>
   </body>
 </html>

@@ -7,7 +7,7 @@ Body {
   margin: 0px;
 }
 header {
-  width: 1000px;
+  width: 1200px;
   margin-left: auto;
   margin-right: auto;
   height: 200px;
@@ -18,7 +18,7 @@ header {
   text-align: center;
 }
 footer {
-  width: 1000px;
+  width: 1200px;
   margin-left: auto;
   margin-right: auto;
   font-style: italic;
@@ -40,7 +40,7 @@ h1 {
   line-height: 1.5;
 }
 #grid-container {
-  width: 1000px;
+  width: 1200px;
   margin-left: auto;
   margin-right: auto;
   background-color: #ffffff;
@@ -49,11 +49,16 @@ h1 {
   gap: 0 16px;
 }
 nav {
-  width: 150px;
+  width: 200px;
   margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 nav a {
   color: #fff;
+  display: block;
+  width: 150px;
   padding: 15px 25px;
   background-color: #80061c;
   background-image: radial-gradient(
@@ -77,14 +82,22 @@ nav a {
   font-size: 16px;
   text-decoration: none;
   border: 0;
+  box-sizing: border-box;
+}
+
+nav ul {
+  padding:0
 }
 
 nav li {
   list-style-type: none;
   text-align: center;
   display: inline-block;
-  margin-left: 8px;
   padding: 20px;
+  width: 200px;
+  margin-left: 20px;
+  flex: 1;
+  box-sizing: border-box
 }
 nav a:hover {
   background-color: #5e5b5c;
@@ -143,7 +156,7 @@ form {
   text-align: center;
 }
 label {
-  display: block;
+  display: flex;
   width: 100%;
   font-weight: bold;
   size: 16px;
@@ -165,8 +178,11 @@ select {
   size: 16px;
   margin-bottom: 24px;
   border-radius: 4px;
-  border-style: 2 px inset;
+  border-style: 2px inset;
   border-color: #000000;
+}
+.locations {
+  text-align: center;
 }
 .flex-container {
   display: flex;
@@ -176,6 +192,12 @@ select {
   width: 25%;
   text-align: center;
   padding: 30px;
+  align-items: center;
+  justify-content: center;
+}
+.center {
+  display: block;
+  margin: 0 auto;
 }
 img {
   display: block;
@@ -196,6 +218,12 @@ img {
   width: 100%;
   height: 100%;
 }
+
+.menu-button {
+  width: 207px;
+  margin-bottom: 6px;
+}
+
 
 #ingredients-container div {
   display: flex;
@@ -253,6 +281,7 @@ img {
 #inventory form label,
 #inventory form input[type="number"],
 #inventory form span {
+  display: block;
   margin-bottom: 20px;
   flex: 0 0 calc(33.33% - 20px);
 }
@@ -266,6 +295,28 @@ img {
   width: 70px;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+/* .th-ingredient-table-1 {
+  width: 170px !important;
+  padding: 0px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  text-align: center;
+}
+
+.td-ingredient-table-1 {
+  width: 170px !important;
+  padding: 0px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  text-align: right;
+} */
+
+.ingredient-table {
+  border-spacing: 0;
+  width: auto;
+  margin: 0 auto;
 }
 
 table {
@@ -287,8 +338,11 @@ th {
 #locationTables {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
+  justify-content: left;
   margin-top: 20px;
+  margin-left: 75px;
+  margin-right: 75px;
 }
 
 #locationTables > div > span {
@@ -296,11 +350,24 @@ th {
   margin-bottom: 10px;
 }
 
-#itemCostSpan, #itemPriceSpan, #welcomeMessage {
+.table-container-div {
+  margin-bottom: 15px;
+}
+
+#itemCostSpan, #itemPriceSpane {
   display: flex;
   justify-content: center;
-  margin-top: 20px; /* Adjust this margin as needed */
-  font-size: 18px; /* Adjust the font size as needed */
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#welcomeMessage {
+  display: flex;
+  justify-content: center;
+  margin-top: 42px;
+  margin-bottom: 10px;
+  font-size: 18px;
   font-weight: bold;
 }
 
@@ -309,7 +376,8 @@ th {
   border: 1px solid #ffffff;
   border-radius: 10px;
   padding: 10px;
-  color: #ffffff
+  color: #ffffff;
+  margin-bottom: 5px;
 }
 
 #incoming {
@@ -346,4 +414,9 @@ th {
 
 .location-selector{
   margin-top: 5px;
+}
+
+#label-for-stores{
+  text-align: center;
+  margin-left: 38px;
 }

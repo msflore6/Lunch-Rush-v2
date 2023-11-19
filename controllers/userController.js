@@ -89,7 +89,7 @@ exports.loginUser = (req, res) => {
         secretKey
         );
 
-        res.cookie('authToken', token, { httpOnly: true, maxAge: 15 * 60 * 1000 });
+        res.cookie('authToken', token, { httpOnly: true, maxAge: 30 * 60 * 1000 });
   
         res.json({ token });
       });

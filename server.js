@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000;
 const path = require('path');
 const userController = require('./controllers/userController');
 const cors = require('cors');
+// const jwt = require('jsonwebtoken');
 const verifyToken = require('./middleware/authMiddleware');
 require('dotenv').config();
 
@@ -33,15 +34,13 @@ app.use((req, res, next) => {
     (token && req.url.includes('account-creation.html'))
   ) {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  } else if (
-    (req.url === '/')
-  ) {
+  } else if (req.url === '/') {
     if (token) {
       res.sendFile(path.join(__dirname, 'public', 'index.html'));
     } else {
       res.sendFile(path.join(__dirname, 'public', 'login.html'));
     }
-  }  else if (
+  } else if (
     !req.url.includes('login.html') &&
     !req.url.includes('account-creation.html') &&
     !req.url.includes('.css') &&

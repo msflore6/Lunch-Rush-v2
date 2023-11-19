@@ -4,8 +4,6 @@
     <meta charset="utf-8" />
     <title>Lunch Rush Database</title>
     <link href="styles.css" rel="stylesheet" />
-    <link rel="shortcut icon" href="images\favicon.ico" type="image/x-icon" />
-    <link rel="icon" href="images\favicon.ico" type="image/x-icon" />
   </head>
   <body>
     <header>
@@ -22,6 +20,7 @@
           <li><a href="/inventory.html">Log Inventory</a></li>
           <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
           <li><a href="/ordering.html">Ordering</a></li>
+          <li><a href="/reporting-analytics.html">Reporting &<br>Analytics</a></li>
         </ul>
       </nav>
 
@@ -35,8 +34,7 @@
           </select>
           <button id="viewStoreInfoBtn">View Store Info</button>
         </div>
-        <div id="locationTables">
-        </div>
+        <div id="locationTables"></div>
         <img
           src="sandwich.png"
           alt="a cartoon cold cuts sandwich"
@@ -98,6 +96,7 @@
 
         for (var key in tableData) {
           var tableContainer = document.createElement("div");
+          tableContainer.className = "table-container-div";
 
           var tableTitle = document.createElement("span");
           tableTitle.textContent = key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2'); // Add space between camelCase words
