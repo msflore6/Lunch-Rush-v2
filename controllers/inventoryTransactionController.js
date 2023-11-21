@@ -2,7 +2,11 @@ const db = require('../middleware/dbConnection.js');
 
 exports.getInventoryTransactionsByLocation = (req, res) => {
     const locationID = req.params.locationID;
-    const query = `SELECT * FROM InventoryTransactions WHERE outgoingLocationID = ${locationID} OR incomingLocationID = ${locationID}`;
+    const query = `
+      SELECT * FROM InventoryTransactions 
+      WHERE outgoingLocationID = ${locationID} 
+      OR incomingLocationID = ${locationID}
+    `;
     db.query(query, (err, results) => {
       if (err) {
         console.error('Error executing MySQL query:', err);
@@ -13,9 +17,37 @@ exports.getInventoryTransactionsByLocation = (req, res) => {
     });
 };
 
+exports.getInventoryTransactionsByLocationByDateRange = (req, res) => {
+  const locationID = req.params.locationID;
+  const startDate = req.params.startDate;
+  const endDate = req.params.endDate;
+  const query = `
+    SELECT * FROM InventoryTransactions 
+    WHERE outgoingLocationID = ${locationID} 
+    OR incomingLocationID = ${locationID}
+    AND
+    transactionDate BETWEEN
+    ${startDate} AND ${endDate}
+  `;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing MySQL query:', err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    res.json(results);
+  });
+};
+
 exports.getInventoryTransactionLineItemsByInventoryLog = (req, res) => {
     const inventoryTransactionID = req.params.inventoryTransactionID;
-    const query = `SELECT Ingredients.ingredientID, Ingredients.ingredientName, quantity FROM InventoryTransactionLineItems INNER JOIN Ingredients ON InventoryTransactionLineItems.ingredientID = Ingredients.ingredientID WHERE inventoryTransactionID = ${inventoryTransactionID}`;
+    const query = `
+      SELECT Ingredients.ingredientID, Ingredients.ingredientName, quantity 
+      FROM InventoryTransactionLineItems 
+      INNER JOIN Ingredients 
+      ON InventoryTransactionLineItems.ingredientID = Ingredients.ingredientID 
+      WHERE inventoryTransactionID = ${inventoryTransactionID}
+    `;
     db.query(query, (err, results) => {
         if (err) {
           console.error('Error executing MySQL query:', err);
@@ -26,10 +58,10 @@ exports.getInventoryTransactionLineItemsByInventoryLog = (req, res) => {
     });
 };
 
-exports.getLatestInventoryTransactionIDByLocation = (req, res) => {
+exports.getLatestInventoryTransactionByLocation = (req, res) => {
   const locationID = req.params.locationID;
   const query = `
-    SELECT inventoryTransactionID 
+    SELECT *
     FROM InventoryTransactions 
     WHERE outgoingLocationID = ${locationID} 
     ORDER BY transactionDate DESC, 

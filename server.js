@@ -5,7 +5,6 @@ const port = process.env.PORT || 3000;
 const path = require('path');
 const userController = require('./controllers/userController');
 const cors = require('cors');
-// const jwt = require('jsonwebtoken');
 const verifyToken = require('./middleware/authMiddleware');
 require('dotenv').config();
 
@@ -25,6 +24,14 @@ const inventoryLogRouter = require('./routes/inventoryLogRouter');
 const inventoryTransactionRouter = require('./routes/inventoryTransactionRouter');
 const menuItemRouter = require('./routes/menuItemRouter');
 
+// Serve static files
+app.use(express.static('public'));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+
+// User registration and login
+app.post('/registration', userController.registerUser);
+app.post('/login', userController.loginUser);
+
 // direct traffic and protect assets from users who aren't logged in
 app.use((req, res, next) => {
   const token = req.cookies.authToken;
@@ -33,10 +40,10 @@ app.use((req, res, next) => {
     (token && req.url.includes('login.html')) ||
     (token && req.url.includes('account-creation.html'))
   ) {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/index.html');
   } else if (req.url === '/') {
     if (token) {
-      res.sendFile(path.join(__dirname, 'public', 'index.html'));
+      res.redirect('/index.html');
     } else {
       res.sendFile(path.join(__dirname, 'public', 'login.html'));
     }
@@ -53,14 +60,6 @@ app.use((req, res, next) => {
     next();
   }
 });
-
-// User registration and login
-app.post('/registration', userController.registerUser);
-app.post('/login', userController.loginUser);
-
-// Serve static files
-app.use(express.static('public'));
-app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
 // API routes
 app.use('/api/users', userRoutes);

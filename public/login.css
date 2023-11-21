@@ -134,12 +134,22 @@ a:hover {
   background-color: #989898;
 }
 
-#message-window {
+/* .response-message {
   display: none;
+  font-weight: bolder;
   border: 1px solid #ffffff;
   border-radius: 10px;
   padding: 10px;
   color: #ffffff
+} */
+
+.response-message {
+  justify-content: center;
+  text-align: center;
+  display: none;
+  color: #ffffff;
+  font-weight: bolder;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 5px;
 }
-
-

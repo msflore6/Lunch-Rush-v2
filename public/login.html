@@ -4,11 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="login.css" />
+    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+    <script src="/common.js"></script>
     <title>User Login</title>
   </head>
   <body>
     <div class="login-container">
-      <div id="message-window"></div>
+      <div class="response-message" id="response-message"></div>
       <div class="logo-container">
         <img src="Lunch_Rush_3.png" alt="Lunch Rush logo" />
       </div>
@@ -22,14 +25,17 @@
   </body>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const message = urlParams.get('message');
+      displayMessage();
+      // const urlParams = new URLSearchParams(window.location.search);
+      // const message = urlParams.get('message');
 
-      const messageWindowDiv = document.getElementById('message-window');
-      if (message) {
-        messageWindowDiv.innerHTML = `<p>${message}</p>`;
-        messageWindowDiv.style.display = 'block';
-      }
+      // const messageWindowDiv = document.getElementById('response-message');
+      // if (message) {
+      //   messageWindowDiv.innerHTML = `${message}`;
+      //   messageWindowDiv.style.display = 'block';
+      //   const newUrl = `${window.location.pathname}?message=${encodedMessage}`;
+      //   window.location.href = newUrl;
+      // }
     });
 
     async function handleLogin(event) {

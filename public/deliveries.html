@@ -30,20 +30,20 @@
         </ul>
       </nav>
       <main>
-        <h2>Inventory Transaction Form</h2>
+        <h2>Delivery Confirmation Form</h2>
         <section id="form">
-          <form id="inventory-transaction-form" class="dynamic-ingredient-form">
-			<div class="response-message" id="response-message"></div>
-			<div id="ingredients-container">
+          <form id="delivery-confirmation-form" class="dynamic-ingredient-form">
+						<div class="response-message" id="response-message"></div>
+						<div id="ingredients-container">
               <!-- Ingredient input sections will be dynamically added here -->
             </div>
             <button type="button" id="add-ingredient-btn" class="submit-button">Add Ingredient...</button>
             <label class="location-label">Location:</label>
             <select name="locations" id="locations" class="location-selector">
-				<option value=1>678 Mountain Vista Ave</option>
-				<option value=2>981 Sunset Rd</option>
-				<option value=3>45 Eastern Rd</option>
-			</select>
+							<option value=1>678 Mountain Vista Ave</option>
+							<option value=2>981 Sunset Rd</option>
+							<option value=3>45 Eastern Rd</option>
+						</select>
             <div class="location-radio-container">
               <label for="outgoing" class="location-radio-label">Outgoing Location</label>
               <input type="radio" id="outgoing" name="locationType" value="outgoing">
@@ -72,7 +72,7 @@
   
       createIngredientSection();
 
-		document.addEventListener("DOMContentLoaded", function () {
+			document.addEventListener("DOMContentLoaded", function () {
         var form = document.querySelector("form");
         displayMessage();
 
@@ -85,11 +85,11 @@
 						const userInfo = await userInfoResponse.json();
 
 						const outgoingRadio = document.getElementById("outgoing");
-   						const incomingRadio = document.getElementById("incoming");
+   					const incomingRadio = document.getElementById("incoming");
 
 						if (!outgoingRadio.checked && !incomingRadio.checked) {
-							setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
-							return;
+								setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
+								return;
 						}
 
 						const selectedLocationID = parseInt(document.getElementById("locations").value, 10);

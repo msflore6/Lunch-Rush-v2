@@ -49,6 +49,106 @@ exports.registerUser = (req, res) => {
     });
 };
 
+exports.changePassword = (req, res) => {
+  console.log("");
+  const { currentPassword, confirmCurrentPassword, newPassword, confirmNewPassword, username } = req.body;
+
+  console.log("Request Body:", req.body);
+  console.log("");
+
+  console.log("Parameters:");
+  console.log("Username: ", username);
+  console.log("Current Password: ", currentPassword);
+  console.log("Confirm Current Password: ", confirmCurrentPassword);
+  console.log("New Password: ", newPassword);
+  console.log("Confirm New Password: ", confirmNewPassword);
+
+  if (currentPassword !== confirmCurrentPassword) {
+    return sendError(res, 'Current password and confirmation do not match');
+  }
+
+  // Check if new password and confirmation match
+  if (newPassword !== confirmNewPassword) {
+    return sendError(res, 'New password and confirmation do not match');
+  }
+
+  if (currentPassword === newPassword) {
+    return sendError(res, 'New password cannot be the same as your current password');
+  }
+
+  // Retrieve the user's current password hash from the database
+  const query = 'SELECT * FROM Users WHERE username = ?';
+  db.query(query, [username], (err, results) => {
+    if (err) {
+      console.error('Error querying user:', err);
+      return res.status(500).send(createAlertHtml('Internal Server Error'));
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send(createAlertHtml('User not found'));
+    }
+
+    const user = results[0];
+    console.log("User credentials: ", user)
+
+    // Compare the hashed current password
+    bcrypt.compare(newPassword.trim(), user.passwordHash, (err, match) => {
+      if (err) {
+        return sendError(res, 'Internal Server Error');
+      }
+
+      if (match) {
+        return sendError(res, 'Your new password cannot be your current password');
+      }
+    });
+
+    bcrypt.compare(currentPassword.trim(), user.passwordHash, (err, match) => {
+      if (err) {
+        return sendError(res, 'Internal Server Error');
+      }
+
+      if (!match) {
+        return sendError(res, 'Current password is incorrect');
+      }
+
+      // Hash the new password
+      bcrypt.hash(newPassword, 10, (err, hash) => {
+        console.log("Hashing new password...")
+        if (err) {
+          return sendError(res, 'Internal Server Error');
+        }
+
+        // Update the user's password in the database
+        const updateQuery = 'UPDATE Users SET passwordHash = ? WHERE username = ?';
+        db.query(updateQuery, [hash, username], (err) => {
+          if (err) {
+            return sendError(res, 'Internal Server Error');
+          }
+
+          res.clearCookie('authToken');
+
+          const newToken = jwt.sign(
+            { 
+              username: user.username, 
+              userId: user.id, 
+              firstName: user.firstName, 
+              lastName: user.lastName, 
+              locationID: user.locationID 
+            }, 
+            secretKey
+          );
+    
+          res.cookie('authToken', newToken, { httpOnly: true, maxAge: 30 * 60 * 1000 });
+
+          console.log("SQL statement for password update successful.")
+          const successMessage = 'Password changed successfully.';
+          res.json({ message: successMessage });
+        });
+      });
+    });
+  });
+};
+
 exports.loginUser = (req, res) => {
   console.log('Login request recieved')  
   
@@ -95,7 +195,17 @@ exports.loginUser = (req, res) => {
       });
     });
 };
-  
+
+exports.checkTokenExpiration = (req, res) => {
+  res.json({ expired: false });
+};
+
+exports.logoutUser = (req, res) => {
+  res.clearCookie('authToken');
+  const logoutMessage = 'User logged out successfully.';
+  res.json({ message: logoutMessage });
+};
+
 exports.getUserInfo = (req, res) => {
   const token = req.cookies.authToken;
 
@@ -127,4 +237,8 @@ function handleLoginFailure(res, message) {
       console.error('Login failure:', message);
       res.send(alertMessage);
     }
+  };
+
+  function sendError(res, message) {
+    res.status(400).json({ error: message });
   }

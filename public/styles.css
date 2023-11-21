@@ -365,7 +365,7 @@ th {
 #welcomeMessage {
   display: flex;
   justify-content: center;
-  margin-top: 42px;
+  margin-top: 80px;
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: bold;
@@ -383,6 +383,7 @@ th {
 #incoming {
   margin-bottom: 10px;
 }
+
 
 .submit-button{
   margin-top: 10px;
@@ -408,15 +409,131 @@ th {
   width: 500px
 }
 
+.location-label {
+  margin-top: 5px;
+  margin-left: 45px;
+}
+
+.location-radio-container {
+  display: flex;
+  align-items: center;
+  margin-top: -5px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.location-radio-container input {
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.location-radio-label {
+  display: inline-block;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
 .quantity-label{
+  margin-right: 2px;
   margin-left: 10px;
 }
 
+#add-ingredient-btn {
+  margin-bottom: 20px !important;
+}
+
 .location-selector{
-  margin-top: 5px;
+  display: flex !important;
+  margin-top: -35px;
 }
 
 #label-for-stores{
   text-align: center;
   margin-left: 38px;
+}
+
+.registration-container {
+  text-align: center;
+  color: #ffffff;
+  /* background-color: #80061c; */
+  border-radius: 10px;
+  padding: 20px;
+  /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); */
+}
+
+.registration-heading {
+  margin-top: 0;
+  color: #000000;
+}
+
+.registration-form input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.registration-button {
+  width: 50%;
+  padding: 10px;
+  margin-top: -15px;
+  background-color: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.registration-button:hover {
+  background-color: #989898;
+}
+
+.error-message {
+  color: #ffffff;
+  font-weight: bolder;
+  margin-top: -32px;
+  margin-bottom: 32px;
+}
+
+.response-message {
+  display: none;
+  color: #ffffff;
+  font-weight: bolder;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 32px;
+}
+
+#date-choice {
+  display: flex;
+}
+
+.date-radio-container {
+  display: flex;
+  white-space: nowrap;
+  margin-left: 8px;
+  margin-right: 8px;
+  margin-bottom: 15px;
+}
+
+#date-selection {
+  display: none;
+}
+
+#date-selection.show {
+  display: block;
+}
+
+.date-container {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.date-container input {
+  margin-left: -40px;
+  width: 250px;
 }

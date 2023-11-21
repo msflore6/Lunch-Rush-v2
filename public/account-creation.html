@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="login.css" />
+    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
     <title>Account Registration</title>
   </head>
   <body>
@@ -48,16 +50,5 @@
       </form>
       <a href="login.html" class="back-to-login-link">Back to Login</a>
     </div>
-    <script>
-      function loadProfilePicture(event) {
-        const profilePicture = document.getElementById("profile-picture");
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function () {
-          profilePicture.src = reader.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    </script>
   </body>
 </html>

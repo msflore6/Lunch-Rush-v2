@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <title>Lunch Rush Database</title>
     <link href="styles.css" rel="stylesheet" />
+    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+    <script src="/common.js"></script>
   </head>
   <body>
     <header>
@@ -20,14 +23,17 @@
           <li><a href="/inventory.html">Log Inventory</a></li>
           <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
           <li><a href="/ordering.html">Ordering</a></li>
+          <li><a href="/deliveries.html">Deliveries</a></li>
           <li><a href="/reporting-analytics.html">Reporting &<br>Analytics</a></li>
+          <li><a href="/account-settings.html">Account Settings</a></li>
+          <li id="logout"><a href=#>Logout</a></li>
         </ul>
       </nav>
       <main>
         <h2>Ordering Form</h2>
         <section id="form">
           <form id="order-form" class="dynamic-ingredient-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
-            <div class="result-message" id="result-message"></div>
+            <div class="response-message" id="response-message"></div>
             <div id="ingredients-container">
               <!-- Ingredient input sections will be dynamically added here -->
             </div>
@@ -48,101 +54,12 @@
       var deleteButton = null;
   
       addIngredientButton.addEventListener("click", createIngredientSection);
-
-      function createIngredientSection() {
-        var div = document.createElement("div");
-        var select = document.createElement("select");
-        var quantityInput = document.createElement("input");
-        var measurementUnit = document.createElement("span");
-        var quantityLabel = document.createElement("span");
-  
-        div.className = "ingredient-section";
-        select.id = "ingredient-" + ingredientCounter;
-        select.name = "ingredient-" + ingredientCounter;
-        select.className = "ingredient-dropdown";
-				quantityInput.id = "quantity-" + ingredientCounter;
-        quantityInput.className = "form-input-box";
-        quantityLabel.className = "quantity-label";
-        quantityLabel.textContent = "Quantity: ";
-
-        var ingredientOptions = [
-          "Bread Rolls",
-          "Mayonnaise",
-          "Mustard",
-          "Ranch Dressing",
-          "Sliced Turkey",
-          "Sliced Ham",
-          "Rotisserie Chicken",
-          "Bacon",
-          "Cheese",
-          "Lettuce",
-          "Tomato"
-        ];
-
-        for (var i = 0; i < ingredientOptions.length; i++) {
-          var option = document.createElement("option");
-          option.value = i + 1; // Option values start from 1
-          option.textContent = ingredientOptions[i];
-          select.appendChild(option);
-        }
-
-        var ingredientsContainer = document.getElementById("ingredients-container");
-        ingredientsContainer.appendChild(select);
-      
-        quantityInput.type = "number";
-        quantityInput.name = "quantity-" + ingredientCounter;
-        quantityInput.required = true;
-        quantityInput.min = "1";
-        quantityInput.max = "20";
-        quantityInput.value = "1";
-  
-        measurementUnit.id = "measurementUnit-" + ingredientCounter;
-        measurementUnit.textContent = "Bags";
-  
-        if (ingredientCounter > 1) {
-          deleteButton = document.createElement("button");
-          deleteButton.type = "button";
-          deleteButton.className = "delete-button";
-          deleteButton.addEventListener("click", function() {
-            ingredientsContainer.removeChild(div);
-            ingredientCounter--;    
-          });
-        }
-  
-        div.appendChild(select);
-        div.appendChild(quantityLabel);
-        div.appendChild(quantityInput);
-        div.appendChild(measurementUnit);
-        
-        if (deleteButton) {
-          div.appendChild(deleteButton);
-        }
-
-        ingredientsContainer.appendChild(div);
-  
-        select.addEventListener("change", function() {
-          updateMeasurementUnit(select, measurementUnit);
-        });
-  
-        ingredientCounter++;
-      }
-  
-      function updateMeasurementUnit(select, measurementUnit) {
-        var selectedOption = parseInt(select.value);
-        if (selectedOption == 1) {
-          measurementUnit.textContent = "Bags";
-        } else if (selectedOption >= 2 && selectedOption <= 4) {
-          measurementUnit.textContent = "Pints";
-        } else {
-          measurementUnit.textContent = "Pounds";
-        }
-      }
   
       createIngredientSection();
 
       document.addEventListener("DOMContentLoaded", function () {
         var form = document.querySelector("form");
-        var resultMessage = document.getElementById("result-message")
+        displayMessage();
 
 				form.addEventListener("submit", async function (event) {
 					event.preventDefault();
@@ -155,9 +72,15 @@
 						const locationID = userInfo.locationID;
             const username = userInfo.username;
 
-						const latestOrderIDResponse = await fetch(`/api/orders/orders/latestID/${locationID}`);
+						const latestOrderIDResponse = await fetch(`/api/orders/orders/${locationID}`);
 						const latestOrderIDData = await latestOrderIDResponse.json();
-						const latestOrderID = latestOrderIDData[0].orderID;
+            let latestOrderID;
+            if (!latestOrderIDData[0]) {
+              latestOrderID = locationID * 100;
+            } else {
+						  latestOrderID = latestOrderIDData[0].orderID;
+            }
+            
 
 						// Prepare data for order
 						const orderObject = {
@@ -218,25 +141,7 @@
 							setResultMessage('An error occurred. Please try again later.', 'error');
 						}
 				});
-
-				function setResultMessage(message, messageType) {
-					resultMessage.innerText = message;
-					resultMessage.style.display = 'block';
-					resultMessage.className = messageType;
-				}
-
-				function getCurrentTimeInPhoenix() {
-          // Get the current date and time in UTC
-          var utcDate = new Date();
-
-          // Adjust the UTC time to Phoenix time
-          var phoenixOffset = -7 * 60; // Phoenix is UTC-7
-          var phoenixTime = new Date(utcDate.getTime() + phoenixOffset * 60 * 1000);
-
-          return phoenixTime;
-        }
-			});
-      
+			});  
     </script>
   </body>
 </html>

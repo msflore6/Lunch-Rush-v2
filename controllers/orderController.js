@@ -2,7 +2,11 @@ const db = require('../middleware/dbConnection.js');
 
 exports.getOrdersByLocation = (req, res) => {
     const locationID = req.params.locationID;
-    const query = `SELECT orderID, username, dateAndTime FROM Orders WHERE locationID = ${locationID}`;
+    const query = `
+      SELECT orderID, username, dateAndTime 
+      FROM Orders 
+      WHERE locationID = ${locationID}
+    `;
     db.query(query, (err, results) => {
       if (err) {
         console.error('Error executing MySQL query:', err);
@@ -11,6 +15,30 @@ exports.getOrdersByLocation = (req, res) => {
       }
       res.json(results);
     });
+};
+
+exports.getOrdersByLocationByDateRange = (req, res) => {
+  const locationID = req.params.locationID;
+  const startDate = req.params.startDate;
+  const endDate = req.params.endDate;
+  const query = `
+    SELECT orderID, username, dateAndTime 
+    FROM Orders 
+    WHERE locationID = ${locationID}
+    AND
+    dateAndTime BETWEEN
+    '${startDate} 00:00:00' 
+    AND 
+    '${endDate} 23:59:59'
+  `;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing MySQL query:', err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    res.json(results);
+  });
 };
 
 exports.getOrderLineItemsByOrder = (req, res) => {
@@ -26,10 +54,10 @@ exports.getOrderLineItemsByOrder = (req, res) => {
     });
 };
 
-exports.getLatestOrderIDByLocation = (req, res) => {
+exports.getLatestOrderByLocation = (req, res) => {
   const locationID = req.params.locationID;
   const query = `
-    SELECT orderID 
+    SELECT * 
     FROM Orders
     WHERE locationID = ${locationID} 
     ORDER BY dateAndTime DESC 

@@ -17,6 +17,30 @@ exports.getInventoryLogsByLocation = (req, res) => {
     });
 };
 
+exports.getInventoryLogsByLocationAndDateRange = (req, res) => {
+  const locationID = req.params.locationID;
+  const startDate = req.params.startDate;
+  const endDate = req.params.endDate;
+  const query = `
+    SELECT inventoryLogID, dateAndTime 
+    FROM InventoryLog 
+    WHERE locationID = ${locationID}
+    AND
+    dateAndTime BETWEEN
+    '${startDate} 00:00:00'
+    AND 
+    '${endDate} 23:59:59'
+  `;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing MySQL query:', err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    res.json(results);
+  });
+};
+
 exports.getInventoryLogLineItemsByInventoryLog = (req, res) => {
     const inventoryLogID = req.params.inventoryLogID;
     const query = `
@@ -46,10 +70,10 @@ exports.getInventoryLogLineItemsByInventoryLog = (req, res) => {
     });
 };
 
-exports.getLatestInventoryLogIDByLocation = (req, res) => {
+exports.getLatestInventoryLogByLocation = (req, res) => {
   const locationID = req.params.locationID;
   const query = `
-    SELECT inventoryLogID 
+    SELECT * 
     FROM InventoryLog 
     WHERE locationID = ${locationID} 
     ORDER BY dateAndTime DESC 

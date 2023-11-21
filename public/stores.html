@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <title>Lunch Rush Database</title>
     <link href="styles.css" rel="stylesheet" />
+    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+    <script src="/common.js"></script>
   </head>
   <body>
     <header>
@@ -20,18 +23,48 @@
           <li><a href="/inventory.html">Log Inventory</a></li>
           <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
           <li><a href="/ordering.html">Ordering</a></li>
+          <li><a href="/deliveries.html">Deliveries</a></li>
           <li><a href="/reporting-analytics.html">Reporting &<br>Analytics</a></li>
+          <li><a href="/account-settings.html">Account Settings</a></li>
+          <li id="logout"><a href=#>Logout</a></li>
         </ul>
       </nav>
 
       <main>
         <div class="flex-container">
+          <div 
+            class="response-message" 
+            id="response-message" 
+            style="color : #000000; margin-bottom: 10px !important; margin-top: 20px !important;"
+          >
+          </div>
           <label for="locations">Choose a store location:</label>
           <select name="locations" id="locations">
             <option value=1>678 Mountain Vista Ave</option>
             <option value=2>981 Sunset Rd</option>
             <option value=3>45 Eastern Rd</option>
           </select>
+          <div id="date-choice">
+            <div class="date-radio-container">
+              <label for="all-dates">Show all data</label>
+              <input type="radio" id="all-dates" name="date-option" value="all-dates" checked>
+            </div>
+            <div class="date-radio-container">
+              <label for="date-range">Show data by date range</label>
+              <input type="radio" id="date-range" name="date-option" value="date-range">
+            </div>
+          </div>
+          <div id="date-selection">
+            <span>Select a date range:</span>
+            <div class="date-container">
+              <label for="startDate">Start Date:</label>
+              <input type="date" id="startDate" name="startDate">
+            </div>
+            <div class="date-container">
+              <label for="endDate">End Date:</label>
+              <input type="date" id="endDate" name="endDate">
+            </div>
+        </div>
           <button id="viewStoreInfoBtn">View Store Info</button>
         </div>
         <div id="locationTables"></div>
@@ -47,17 +80,70 @@
     </footer>
 
     <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        displayMessage();
+        const dateRangeInput = document.getElementById("date-range");
+        const allDatesInput = document.getElementById("all-dates");
+        const dateSelection = document.getElementById("date-selection");
+
+        function setRequired(isRequired) {
+            document.getElementById("startDate").required = isRequired;
+            document.getElementById("endDate").required = isRequired;
+        }
+
+        if (dateRangeInput) {
+          dateRangeInput.addEventListener("change", function () {
+            if (this.checked) {
+              dateSelection.classList.add("show");
+              setRequired(true);
+            }
+          });
+        }
+
+        if (allDatesInput) {
+          allDatesInput.addEventListener("change", function () {
+            if (this.checked) {
+              dateSelection.classList.remove("show");
+              setRequired(false);
+            }
+          });
+        }
+
+
+        document.getElementById("viewStoreInfoBtn").addEventListener("click", async function () {
+          const locationID = parseInt(document.getElementById("locations").value, 10);
+
+          if (!dateRangeInput.checked && !allDatesInput.checked) {
+            setResultMessage("Please choose whether you would like to view entries for all dates or a specific date range.", 'error');
+            return;
+          } else if (allDatesInput.checked) {
+            clearMessage();
+            await populateArrays(locationID);
+            generateTables();
+          } else if (dateRangeInput.checked) {
+            clearMessage();
+            const startDateInput = document.getElementById("startDate").value;
+            const endDateInput = document.getElementById("endDate").value;
+
+            if (!startDateInput || !endDateInput) {
+                setResultMessage("Please enter both start and end dates.", 'error');
+                return;
+            }
+
+            const startDate = new Date(startDateInput).toISOString().slice(0, 10);
+            const endDate = new Date(endDateInput).toISOString().slice(0, 10);
+
+            await populateArraysByDate(locationID, startDate, endDate);
+            generateTables();
+          }
+        });
+      });
+
       var employeesArray = [];
       var transactionsArray = [];
       var ordersArray = [];
       var inventoryLogsArray = [];
       var inventoryTransactionsArray = [];
-
-      document.getElementById("viewStoreInfoBtn").addEventListener("click", async function () {
-        const locationID = parseInt(document.getElementById("locations").value, 10);
-        await populateArrays(locationID);
-        generateTables();
-      });
 
       async function populateArrays(locationID) {
         employeesArray = await fetchData('employees', locationID);
@@ -67,8 +153,21 @@
         inventoryTransactionsArray = await fetchData('inventoryTransactions', locationID);
       }
 
-      async function fetchData(endpoint, locationID, array) {
+      async function populateArraysByDate(locationID, startDate, endDate) {
+        employeesArray = await fetchData('employees', locationID);
+        transactionsArray = await fetchDataByDate('transactions', locationID, startDate, endDate);
+        ordersArray = await fetchDataByDate('orders', locationID, startDate, endDate);
+        inventoryLogsArray = await fetchDataByDate('inventoryLogs', locationID, startDate, endDate);
+        inventoryTransactionsArray = await fetchDataByDate('inventoryTransactions', locationID, startDate, endDate);
+      }
+
+      async function fetchData(endpoint, locationID) {
         const response = await fetch(`/api/${endpoint}/${endpoint}/${locationID}`);
+        return response.json();
+      }
+
+      async function fetchDataByDate(endpoint, locationID, startDate, endDate) {
+        const response = await fetch(`/api/${endpoint}/${endpoint}/${locationID}/${startDate}/${endDate}`);
         return response.json();
       }
 
