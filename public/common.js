@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-function createIngredientSection() {
+function createIngredientSection(textOption1, textOption2, textOption3) {
   var div = document.createElement("div");
   var select = document.createElement("select");
   var quantityInput = document.createElement("input");
@@ -115,7 +115,7 @@ function createIngredientSection() {
   quantityInput.value = "1";
 
   measurementUnit.id = "measurementUnit-" + ingredientCounter;
-  measurementUnit.textContent = "Rolls";
+  measurementUnit.textContent = textOption1;
 
   if (ingredientCounter > 1) {
     deleteButton = document.createElement("button");
@@ -138,22 +138,44 @@ function createIngredientSection() {
 
   ingredientsContainer.appendChild(div);
 
-  select.addEventListener("change", function() {
-    updateMeasurementUnit(select, measurementUnit);
+  select.addEventListener("change", () => {
+    updateMeasurementUnit(select, measurementUnit, textOption1, textOption2, textOption3);
   });
 
   ingredientCounter++;
 }
 
-function updateMeasurementUnit(select, measurementUnit) {
+function updateMeasurementUnit(select, measurementUnit, textOption1, textOption2, textOption3) {
   var selectedOption = parseInt(select.value);
   if (selectedOption == 1) {
-    measurementUnit.textContent = "Rolls";
+    measurementUnit.textContent = textOption1;
   } else if (selectedOption >= 2 && selectedOption <= 4) {
-    measurementUnit.textContent = "Fl oz";
+    measurementUnit.textContent = textOption2;
   } else {
-    measurementUnit.textContent = "Oz";
+    measurementUnit.textContent = textOption3;
   }
+}
+
+function checkDuplicates() {
+  const selectedIngredients = [];
+	let hasDuplicate = false;
+
+	for (let i = 1; i < ingredientCounter; i++) {
+    const selectElement = document.getElementById(`ingredient-${i}`);
+    const selectedIngredient = parseInt(selectElement.value);
+
+	  if (selectedIngredients.includes(selectedIngredient)) {
+      hasDuplicate = true;
+      break;
+		}
+
+	  selectedIngredients.push(selectedIngredient);
+	}
+
+	if (hasDuplicate) {
+		setResultMessage('You cannot have multiple lines for the same ingredient.', 'error');
+		return;
+	}
 }
 
 function getCurrentTimeInPhoenix() {
@@ -172,6 +194,16 @@ function getCurrentDateInPhoenix() {
   // Get the date in YYYY-MM-DD format
   var formattedDate = phoenixDate.toISOString().split('T')[0];
   return formattedDate;
+}
+
+function formatDateTime(dateTimeString) {
+  const options = { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+  return new Date(dateTimeString).toLocaleDateString('en-US', options);
+}
+
+function formatDate(dateString) {
+  const options = { month: 'numeric', day: 'numeric', year: 'numeric' };
+  return new Date(dateString).toLocaleDateString('en-US', options);
 }
 
 function setResultMessage(message, messageType) {

@@ -17,17 +17,13 @@ exports.getInventoryTransactionsByLocation = (req, res) => {
     });
 };
 
-exports.getInventoryTransactionsByLocationByDateRange = (req, res) => {
+exports.getInventoryTransactionsByIncomingLocation = (req, res) => {
   const locationID = req.params.locationID;
   const startDate = req.params.startDate;
   const endDate = req.params.endDate;
   const query = `
     SELECT * FROM InventoryTransactions 
-    WHERE outgoingLocationID = ${locationID} 
-    OR incomingLocationID = ${locationID}
-    AND
-    transactionDate BETWEEN
-    ${startDate} AND ${endDate}
+    WHERE incomingLocationID = ${locationID}
   `;
   db.query(query, (err, results) => {
     if (err) {
@@ -39,7 +35,56 @@ exports.getInventoryTransactionsByLocationByDateRange = (req, res) => {
   });
 };
 
-exports.getInventoryTransactionLineItemsByInventoryLog = (req, res) => {
+exports.getInventoryTransactionsByOutgoingLocationByDate = (req, res) => {
+  const locationID = req.params.locationID;
+  const startDate = req.params.startDate;
+  const endDate = req.params.endDate;
+  const query = `
+    SELECT * FROM InventoryTransactions 
+    WHERE outgoingLocationID = ${locationID}
+    AND
+    transactionDate BETWEEN
+    '${startDate}'
+    AND 
+    '${endDate}'
+  `;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing MySQL query:', err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    res.json(results);
+  });
+};
+
+exports.getInventoryTransactionsByLocationByDateRange = (req, res) => {
+  const locationID = req.params.locationID;
+  const startDate = req.params.startDate;
+  const endDate = req.params.endDate;
+  const query = `
+    SELECT * FROM InventoryTransactions 
+    WHERE
+    (outgoingLocationID = ${locationID} OR incomingLocationID = ${locationID})
+    AND
+    transactionDate BETWEEN
+    '${startDate}'
+    AND 
+    '${endDate}'
+  `;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing MySQL query:', err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    console.log("query: ", query);
+    res.json(results);
+    console.log("results: ", results)
+  });
+};
+
+exports.getInventoryTransactionLineItemsByInventoryTransaction = (req, res) => {
     const inventoryTransactionID = req.params.inventoryTransactionID;
     const query = `
       SELECT Ingredients.ingredientID, Ingredients.ingredientName, quantity 
@@ -56,6 +101,25 @@ exports.getInventoryTransactionLineItemsByInventoryLog = (req, res) => {
         }
         res.json(results);
     });
+};
+
+exports.getInventoryTransactionLineItemsByInventoryTransactionWithID = (req, res) => {
+  const inventoryTransactionID = req.params.inventoryTransactionID;
+  const query = `
+    SELECT InventoryTransactionID, Ingredients.ingredientID, Ingredients.ingredientName, quantity 
+    FROM InventoryTransactionLineItems 
+    INNER JOIN Ingredients 
+    ON InventoryTransactionLineItems.ingredientID = Ingredients.ingredientID 
+    WHERE inventoryTransactionID = ${inventoryTransactionID}
+  `;
+  db.query(query, (err, results) => {
+      if (err) {
+        console.error('Error executing MySQL query:', err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+      res.json(results);
+  });
 };
 
 exports.getLatestInventoryTransactionByLocation = (req, res) => {

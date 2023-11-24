@@ -27,9 +27,9 @@ exports.getOrdersByLocationByDateRange = (req, res) => {
     WHERE locationID = ${locationID}
     AND
     dateAndTime BETWEEN
-    '${startDate} 00:00:00' 
+    '${startDate}' 
     AND 
-    '${endDate} 23:59:59'
+    '${endDate}'
   `;
   db.query(query, (err, results) => {
     if (err) {
@@ -43,7 +43,14 @@ exports.getOrdersByLocationByDateRange = (req, res) => {
 
 exports.getOrderLineItemsByOrder = (req, res) => {
     const orderID = req.params.orderID;
-    const query = `SELECT OrderLineItems.ingredientID, Ingredients.ingredientName, quantity FROM OrderLineItems INNER JOIN Ingredients ON OrderLineItems.ingredientID = Ingredients.ingredientID WHERE orderID = ${orderID};`;
+    const query = `
+      SELECT OrderLineItems.ingredientID, Ingredients.ingredientName, quantity 
+      FROM OrderLineItems 
+      INNER JOIN Ingredients 
+      ON OrderLineItems.ingredientID = 
+      Ingredients.ingredientID 
+      WHERE orderID = ${orderID};
+    `;
     db.query(query, (err, results) => {
         if (err) {
           console.error('Error executing MySQL query:', err);

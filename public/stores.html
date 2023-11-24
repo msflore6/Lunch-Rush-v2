@@ -64,10 +64,10 @@
               <label for="endDate">End Date:</label>
               <input type="date" id="endDate" name="endDate">
             </div>
+          </div>
+          <button id="viewStoreInfoBtn" class="view-button">View Store Info</button>
         </div>
-          <button id="viewStoreInfoBtn">View Store Info</button>
-        </div>
-        <div id="locationTables"></div>
+        <div id="locationTables" class="retrieved-tables"></div>
         <img
           src="sandwich.png"
           alt="a cartoon cold cuts sandwich"
@@ -120,6 +120,7 @@
             clearMessage();
             await populateArrays(locationID);
             generateTables();
+            checkArraysAndDisplayMessage();
           } else if (dateRangeInput.checked) {
             clearMessage();
             const startDateInput = document.getElementById("startDate").value;
@@ -135,6 +136,7 @@
 
             await populateArraysByDate(locationID, startDate, endDate);
             generateTables();
+            checkArraysAndDisplayMessage();
           }
         });
       });
@@ -154,10 +156,12 @@
       }
 
       async function populateArraysByDate(locationID, startDate, endDate) {
+        const startDateTime = startDate + " 00:00:00";
+        const endDateTime = endDate + " 23:59:59";
         employeesArray = await fetchData('employees', locationID);
-        transactionsArray = await fetchDataByDate('transactions', locationID, startDate, endDate);
-        ordersArray = await fetchDataByDate('orders', locationID, startDate, endDate);
-        inventoryLogsArray = await fetchDataByDate('inventoryLogs', locationID, startDate, endDate);
+        transactionsArray = await fetchDataByDate('transactions', locationID, startDateTime, endDateTime);
+        ordersArray = await fetchDataByDate('orders', locationID, startDateTime, endDateTime);
+        inventoryLogsArray = await fetchDataByDate('inventoryLogs', locationID, startDateTime, endDateTime);
         inventoryTransactionsArray = await fetchDataByDate('inventoryTransactions', locationID, startDate, endDate);
       }
 
@@ -171,19 +175,11 @@
         return response.json();
       }
 
-      function formatDateTime(dateTimeString) {
-        const options = { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
-        return new Date(dateTimeString).toLocaleDateString('en-US', options);
-      }
-
-      function formatDate(dateString) {
-        const options = { month: 'numeric', day: 'numeric', year: 'numeric' };
-        return new Date(dateString).toLocaleDateString('en-US', options);
-      }
-
       function generateTables() {
         // Clear existing tables
         document.getElementById("locationTables").innerHTML = "";
+        const allDatesInput = document.getElementById("all-dates");
+        const dateRangeInput = document.getElementById("date-range");
 
         var tableData = {
           employees: employeesArray,
@@ -194,6 +190,10 @@
         };
 
         for (var key in tableData) {
+          if (tableData[key].length === 0) {
+            continue; // Skip generating the table if the array is empty
+          }
+          
           var tableContainer = document.createElement("div");
           tableContainer.className = "table-container-div";
 
@@ -297,6 +297,14 @@
 
           document.getElementById("locationTables").appendChild(tableContainer);
         }
+      }
+
+      function checkArraysAndDisplayMessage() {
+          var allArrays = [employeesArray, transactionsArray, ordersArray, inventoryLogsArray, inventoryTransactionsArray];
+
+          if (allArrays.every(array => Array.isArray(array) && array.length === 0)) {
+              setResultMessage("No data was found.", "success");
+          }
       }
 
       document.getElementById("viewStoreInfoBtn").addEventListener("click", function() {

@@ -38,20 +38,20 @@
               <!-- Ingredient input sections will be dynamically added here -->
             </div>
             <button type="button" id="add-ingredient-btn" class="submit-button">Add Ingredient...</button>
-            <label class="location-label">Location:</label>
-            <select name="locations" id="locations" class="location-selector">
+            <label class="location-label">Incoming Location:</label>
+            <select name="locations" id="locations" class="location-selector"  style="margin-left: 120px;">
 				<option value=1>678 Mountain Vista Ave</option>
 				<option value=2>981 Sunset Rd</option>
 				<option value=3>45 Eastern Rd</option>
 			</select>
-            <div class="location-radio-container">
+            <!-- <div class="location-radio-container">
               <label for="outgoing" class="location-radio-label">Outgoing Location</label>
               <input type="radio" id="outgoing" name="locationType" value="outgoing">
             </div>
             <div class="location-radio-container">
               <label for="incoming" class="location-radio-label">Incoming Location</label>
               <input type="radio" id="incoming" name="locationType" value="incoming">
-            </div>
+            </div> -->
             <input type="submit" value="Log Inventory Transaction" class="submit-button"/>
           </form>
         </section>
@@ -68,9 +68,11 @@
       var ingredientCounter = 1;
       var deleteButton = null;
   
-      addIngredientButton.addEventListener("click", createIngredientSection);
+      createIngredientSection("Rolls", "Fl Oz", "Oz");
   
-      createIngredientSection();
+      addIngredientButton.addEventListener("click", function () {
+        createIngredientSection("Rolls", "Fl Oz", "Oz");
+      });
 
 		document.addEventListener("DOMContentLoaded", function () {
         var form = document.querySelector("form");
@@ -84,13 +86,13 @@
 						const userInfoResponse = await fetch('/api/users/userInfo');
 						const userInfo = await userInfoResponse.json();
 
-						const outgoingRadio = document.getElementById("outgoing");
-   						const incomingRadio = document.getElementById("incoming");
+						// const outgoingRadio = document.getElementById("outgoing");
+   						// const incomingRadio = document.getElementById("incoming");
 
-						if (!outgoingRadio.checked && !incomingRadio.checked) {
-							setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
-							return;
-						}
+						// if (!outgoingRadio.checked && !incomingRadio.checked) {
+						// 	setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
+						// 	return;
+						// }
 
 						const selectedLocationID = parseInt(document.getElementById("locations").value, 10);
 
@@ -99,24 +101,27 @@
 							return;
 						}
 
-						// Get the latest inventory transaction ID
-						let outgoingLocationID, incomingLocationID;
-						if (outgoingRadio.checked) {
-							outgoingLocationID = selectedLocationID;
-							incomingLocationID = userInfo.locationID;
-						} else if (incomingRadio.checked) {
-							outgoingLocationID = userInfo.locationID;
-							incomingLocationID = selectedLocationID;
-						}
+						checkDuplicates();
 
-						const latestTransactionIDResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/latest/${outgoingLocationID}`);
+						// Old code for getttomg the latest inventory transaction ID
+						// let outgoingLocationID, incomingLocationID;
+						// if (outgoingRadio.checked) {
+						// 	outgoingLocationID = selectedLocationID;
+						// 	incomingLocationID = userInfo.locationID;
+						// } else if (incomingRadio.checked) {
+						// 	outgoingLocationID = userInfo.locationID;
+						// 	incomingLocationID = selectedLocationID;
+						// }
+
+						const latestTransactionIDResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/latest/${userInfo.locationID}`);
 						const latestTransactionIDData = await latestTransactionIDResponse.json();
 						const latestTransactionID = latestTransactionIDData[0].inventoryTransactionID;
+						const incomingLocationID = selectedLocationID
 
 						// Prepare data for inventory transaction
 						const inventoryTransactionObject = {
 							inventoryTransactionID: latestTransactionID + 1,
-							outgoingLocationID: outgoingLocationID,
+							outgoingLocationID: userInfo.locationID,
 							incomingLocationID: incomingLocationID,
 							date: getCurrentDateInPhoenix(),
 						};

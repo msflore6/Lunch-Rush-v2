@@ -52,14 +52,17 @@
       var addIngredientButton = document.getElementById("add-ingredient-btn");
       var ingredientCounter = 1;
       var deleteButton = null;
+
+      createIngredientSection("Bags", "Pints", "Pounds");
   
-      addIngredientButton.addEventListener("click", createIngredientSection);
-  
-      createIngredientSection();
+      addIngredientButton.addEventListener("click", function () {
+        createIngredientSection("Bags", "Pints", "Pounds");
+      });
 
       document.addEventListener("DOMContentLoaded", function () {
         var form = document.querySelector("form");
         displayMessage();
+        
 
 				form.addEventListener("submit", async function (event) {
 					event.preventDefault();
@@ -80,7 +83,6 @@
             } else {
 						  latestOrderID = latestOrderIDData[0].orderID;
             }
-            
 
 						// Prepare data for order
 						const orderObject = {

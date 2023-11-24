@@ -205,13 +205,20 @@ img {
   padding: 30px;
 }
 
+button {
+  box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+}
+
 .delete-button {
   width: 30px !important;
   height: 30px !important;
-  background: url('delete-icon.png') no-repeat center center;
-  background-size: cover;
+  background: url('delete-icon.png') no-repeat center center !important;
+  background-size: cover !important;
   border: none !important;
-  cursor: pointer;
+  cursor: pointer !important;
 }
 
 .delete-button img {
@@ -335,7 +342,7 @@ th {
   background-color: #f2f2f2;
 }
 
-#locationTables {
+.retrieved-tables {
   display: flex;
   flex-direction: column;
   align-items: left;
@@ -343,11 +350,18 @@ th {
   margin-top: 20px;
   margin-left: 75px;
   margin-right: 75px;
+  font-family: Ariel, Verdana, sans-serif;
+  line-height: 1.5;
 }
 
-#locationTables > div > span {
+.retrieved-tables > div > span {
   font-weight: bold;
   margin-bottom: 10px;
+  text-align: left;
+}
+
+#reportingTables {
+  width: 850px;
 }
 
 .table-container-div {
@@ -384,6 +398,9 @@ th {
   margin-bottom: 10px;
 }
 
+.get-ingredients-btn {
+  display: block;
+}
 
 .submit-button{
   margin-top: 10px;
@@ -409,9 +426,49 @@ th {
   width: 500px
 }
 
+#delivery-type-ID-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+#delivery-type-ID-container label {
+  margin-top: -11px;
+  margin-left: -5px
+}
+
+#ID-label {
+  margin-top: 0px !important;
+}
+
+#location-and-ID {
+  display: flex;
+  align-items: center;
+  margin-bottom: -15px;
+}
+
+#delivery-type-ID {
+  display: inline-block;
+  width: 80px;
+  margin-top: 10px;
+  margin-left: -5px;
+  margin-bottom: 10px;
+}
+
+#get-ingredients-btn-container {
+  margin-top: 0px;
+}
+
+#submit-button-div {
+  display: none;
+}
+
 .location-label {
   margin-top: 5px;
   margin-left: 45px;
+  margin-right: 10px;
 }
 
 .location-radio-container {
@@ -427,6 +484,18 @@ th {
   margin-right: 5px;
 }
 
+#order, #inventory-transaction {
+  margin-left: -2px;
+  margin-right: 10px;
+}
+
+.delivery-type-label {
+  display: inline-block;
+  margin-right: 5px;
+  margin-left: 15px;
+  white-space: nowrap;
+}
+
 .location-radio-label {
   display: inline-block;
   margin-right: 10px;
@@ -434,7 +503,7 @@ th {
 }
 
 .quantity-label{
-  margin-right: 2px;
+  margin-right: 10px;
   margin-left: 10px;
 }
 
@@ -536,4 +605,18 @@ th {
 .date-container input {
   margin-left: -40px;
   width: 250px;
+}
+
+.quantity-div {
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-right: 2px;
+}
+
+.measurement-unit-span {
+  margin-left: -2px;
+}
+
+.view-button {
+  margin-top: 10px;
 }

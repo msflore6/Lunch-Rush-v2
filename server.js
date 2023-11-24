@@ -23,14 +23,11 @@ const orderRouter = require('./routes/orderRouter');
 const inventoryLogRouter = require('./routes/inventoryLogRouter');
 const inventoryTransactionRouter = require('./routes/inventoryTransactionRouter');
 const menuItemRouter = require('./routes/menuItemRouter');
+const deliveryRouter = require('./routes/deliveryRouter');
 
 // Serve static files
 app.use(express.static('public'));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
-
-// User registration and login
-app.post('/registration', userController.registerUser);
-app.post('/login', userController.loginUser);
 
 // direct traffic and protect assets from users who aren't logged in
 app.use((req, res, next) => {
@@ -62,6 +59,8 @@ app.use((req, res, next) => {
 });
 
 // API routes
+app.post('/registration', userController.registerUser);
+app.post('/login', userController.loginUser);
 app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeRouter);
 app.use('/api/transactions', transactionRouter);
@@ -69,6 +68,7 @@ app.use('/api/orders', orderRouter);
 app.use('/api/inventoryLogs', inventoryLogRouter);
 app.use('/api/inventoryTransactions', inventoryTransactionRouter);
 app.use('/api/menuItems', menuItemRouter);
+app.use('/api/deliveries', deliveryRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

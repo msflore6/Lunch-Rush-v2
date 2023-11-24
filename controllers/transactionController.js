@@ -27,9 +27,9 @@ exports.getTransactionsByLocationByDateRange = (req, res) => {
     WHERE locationID = ${locationID}
     AND
     dateAndTime BETWEEN
-    '${startDate} 00:00:00' 
+    '${startDate}' 
     AND 
-    '${endDate} 23:59:59'
+    '${endDate}'
   `;
   db.query(query, (err, results) => {
     if (err) {

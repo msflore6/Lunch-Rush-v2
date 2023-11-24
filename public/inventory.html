@@ -96,7 +96,439 @@
               // Get the latest inventory log ID
               const latestLogIDResponse = await fetch(`/api/inventoryLogs/inventoryLogs/latest/${userInfo.locationID}`);
               const latestLogIDData = await latestLogIDResponse.json();
-              const latestLogID = latestLogIDData[0].inventoryLogID;
+              const latestLogID = latestLogIDData[0].inventoryLogID;  
+
+              const phoenixTime = new Date(latestLogIDData[0].dateAndTime);
+              const year = phoenixTime.getFullYear();
+              const month = (phoenixTime.getMonth() + 1).toString().padStart(2, '0');
+              const day = phoenixTime.getDate().toString().padStart(2, '0');
+              const hours = phoenixTime.getHours().toString().padStart(2, '0');
+              const minutes = phoenixTime.getMinutes().toString().padStart(2, '0');
+              const seconds = phoenixTime.getSeconds().toString().padStart(2, '0');
+
+              const previousLogDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+              const previousLogDate = previousLogDateTime.slice(0, 10); // Extracting 'YYYY-MM-DD'
+              const currentDateTime = getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " ");
+              const currentDate = getCurrentDateInPhoenix();
+
+              // console.log("previousLogDateTime: ", previousLogDateTime);
+              // console.log("previousLogDate: ", previousLogDate);
+              // console.log("currentDateTime: ", currentDateTime);
+              // console.log("currentDate: ", currentDate);
+
+              const locationID = userInfo.locationID;
+              const startDateTime = previousLogDateTime;
+              const startDate = previousLogDate;
+              const endDateTime = currentDateTime;
+              const endDate = currentDate;
+
+              // Fetch data from API routes
+              const deliveriesOrdersResponse = await fetch(`/api/deliveries/orders/${locationID}/${startDateTime}/${endDateTime}`);
+              const deliveriesOrdersData = await deliveriesOrdersResponse.json();
+
+              const deliveriesInventoryTransactionsResponse = await fetch(`/api/deliveries/inventoryTransactions/${locationID}/${startDateTime}/${endDateTime}`);
+              const deliveriesInventoryTransactionsData = await deliveriesInventoryTransactionsResponse.json();
+
+              const inventoryLogsResponse = await fetch(`/api/inventoryLogs/inventoryLogs/${locationID}/${startDateTime}/${endDateTime}`);
+              const inventoryLogsData = await inventoryLogsResponse.json();
+
+              const inventoryTransactionsResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/outgoing/${locationID}/${startDate}/${endDate}`);
+              const inventoryTransactionsData = await inventoryTransactionsResponse.json();
+
+              // const ordersResponse = await fetch(`/api/orders/orders/${locationID}/${startDateTime}/${endDateTime}`);
+              // const ordersData = await ordersResponse.json();
+
+              const transactionsResponse = await fetch(`/api/transactions/transactions/${locationID}/${startDateTime}/${endDateTime}`);
+              const transactionsData = await transactionsResponse.json();
+
+              const menuItemsResponse = await fetch(`/api/menuItems/menuItems`);
+              const menuItemsData = await menuItemsResponse.json();
+
+              // Store the fetched data into const objects
+              const deliveriesOrders = deliveriesOrdersData;
+              const deliveriesInventoryTransactions = deliveriesInventoryTransactionsData;
+              const inventoryLogs = inventoryLogsData;
+              const inventoryTransactions = inventoryTransactionsData;
+              // const orders = ordersData;
+              const transactions = transactionsData;
+              const menuItems = menuItemsData;
+
+              // console.log('inventoryTransactions: ', inventoryTransactions);
+
+              // console.log("deliveriesOrders: ", deliveriesOrders);
+              // console.log("deliveriesInventoryTransactions: ", deliveriesInventoryTransactions);
+              // console.log("inventoryLogs: ", inventoryLogs);
+              // console.log("inventoryTransactions: ", inventoryTransactions)
+              // console.log("orders: ", orders);
+              // console.log("transactions: ", transactions);
+
+              const deliveriesLineItems = [];
+              const inventoryLogsLineItems = []; //
+              const inventoryTransactionsLineItems = [];
+              const transactionsLineItems = []; //
+              const menuItemIngredients = []; //
+
+              // Function to fetch line items for a specific entry
+              async function fetchLineItems(apiRoute, id) {
+                const response = await fetch(`/api/${apiRoute}/${apiRoute}/lineItems/${id}`);
+                return response.json();
+              }
+
+              // Function to populate line items array for a specific table
+              async function populateLineItemsArray(apiRoute, mainArray, lineItemsArray, idLabel) {
+                if (mainArray.length > 0) {
+                  for (const entry of mainArray) {
+                    const lineItems = await fetchLineItems(apiRoute, entry[`${idLabel}ID`]);
+                    lineItemsArray.push(...lineItems);
+                  }
+                }
+              }
+
+              // Call the functions to populate line items arrays
+              await populateLineItemsArray('deliveries', deliveriesOrders, deliveriesLineItems, 'delivery');
+              await populateLineItemsArray('deliveries', deliveriesInventoryTransactions, deliveriesLineItems, 'delivery');
+              await populateLineItemsArray('inventoryLogs', inventoryLogs, inventoryLogsLineItems, 'inventoryLog');
+              await populateLineItemsArray('inventoryTransactions', inventoryTransactions, inventoryTransactionsLineItems, 'inventoryTransaction');
+              await populateLineItemsArray('transactions', transactions, transactionsLineItems, 'transaction');
+
+              // console.log("inventoryTransactionsLineItems: ", inventoryTransactionsLineItems);
+
+              for (let i = 1; i <= 5; i++) {
+                const response = await fetch(`/api/menuItems/menuItems/ingredients/${i}`);
+                const menuItemIngredientList = await response.json();
+                menuItemIngredients.push(menuItemIngredientList);
+              }
+
+              // console.log("deliveriesLineItems: ", deliveriesLineItems);
+              // console.log("inventoryLogsLineItems: ", inventoryLogsLineItems);
+              // console.log("inventoryTransactionsLineItems: ", inventoryTransactionsLineItems);
+              // console.log("transactionsLineItems: ", transactionsLineItems);
+              // console.log("menuItemIngredients: ", menuItemIngredients);
+
+              // initialize quantity variables.
+              let breadRollsQuantity = 0,
+              mayonnaiseQuantity = 0,
+              mustardQuantity = 0,
+              ranchDressingQuantity = 0,
+              slicedTurkeyQuantity = 0,
+              sliceHamQuantity = 0,
+              rotissereChickenQuantity = 0,
+              baconQuantity = 0,
+              cheeseQuantity = 0,
+              lettuceQuantity = 0,
+              tomatoQuantity = 0;
+
+              for (const entry of inventoryLogsLineItems) {
+                const ingredientID = entry.ingredientID;
+                const quantity = entry.quantity;
+
+                switch (ingredientID) {
+                  case 1:
+                    breadRollsQuantity += quantity;
+                    break;
+                  case 2:
+                    mayonnaiseQuantity += quantity;
+                    break;
+                  case 3:
+                    mustardQuantity += quantity;
+                    break;
+                  case 4:
+                    ranchDressingQuantity += quantity;
+                    break;
+                  case 5:
+                    slicedTurkeyQuantity += quantity;
+                    break;
+                  case 6:
+                    sliceHamQuantity += quantity;
+                    break;
+                  case 7:
+                    rotissereChickenQuantity += quantity;
+                    break;
+                  case 8:
+                    baconQuantity += quantity;
+                    break;
+                  case 9:
+                    cheeseQuantity += quantity;
+                    break;
+                  case 10:
+                    lettuceQuantity += quantity;
+                    break;
+                  case 11:
+                    tomatoQuantity += quantity;
+                    break;
+                  // Add more cases if needed for additional ingredients
+                  default:
+                    // Handle unexpected ingredientID (if any)
+                    break;
+                }
+              }
+
+              // Now the quantity variables should be updated based on inventoryLogsLineItems
+              // console.log("Updated Quantities (after Inventory Log check):");
+              // console.log("Bread Rolls: ", breadRollsQuantity);
+              // console.log("Mayonnaise: ", mayonnaiseQuantity);
+              // console.log("Mustard: ", mustardQuantity);
+              // console.log("Ranch Dressing: ", ranchDressingQuantity);
+              // console.log("Sliced Turkey: ", slicedTurkeyQuantity);
+              // console.log("Sliced Ham: ", sliceHamQuantity);
+              // console.log("Rotissere Chicken: ", rotissereChickenQuantity);
+              // console.log("Bacon: ", baconQuantity);
+              // console.log("Cheese: ", cheeseQuantity);
+              // console.log("Lettuce: ", lettuceQuantity);
+              // console.log("Tomato: ", tomatoQuantity);
+
+              for (const transactionLineItem of transactionsLineItems) {
+                // console.log("transactionLineItem: ", transactionLineItem);
+                if (transactionLineItem.menuItemID) {
+                  // console.log("transactionLineItem.menuItemID: ", transactionLineItem.menuItemID);
+                  const menuItemIndex = transactionLineItem.menuItemID - 1;
+                  // console.log("menuItemIndex: ", menuItemIndex);
+                  if (menuItemIndex >= 0 && menuItemIndex < menuItemIngredients.length) {
+                    const menuItemIngredientsForItem = menuItemIngredients[menuItemIndex];
+                    // console.log("menuItemIngredientsForItem: ", menuItemIngredientsForItem);
+                    for (let i = 0; i < menuItemIngredientsForItem.length; i++) {
+                      // console.log("menuItemIngredientsForItem: ", menuItemIngredientsForItem);
+                      const ingredient = menuItemIngredientsForItem[i];
+                      console.log("transactionLineItem.quantity: ", transactionLineItem.quantity);
+                      switch (ingredient.ingredientID) {
+                        case 1:
+                          breadRollsQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 2:
+                          mayonnaiseQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 3:
+                          mustardQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 4:
+                          ranchDressingQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 5:
+                          slicedTurkeyQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 6:
+                          sliceHamQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 7:
+                          rotissereChickenQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 8:
+                          baconQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 9:
+                          cheeseQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 10:
+                          lettuceQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        case 11:
+                          tomatoQuantity -= ingredient.quantity * transactionLineItem.quantity;
+                          break;
+                        default:
+                          console.log("unexpected case")
+                          // Handle unexpected cases
+                          break;
+                      }
+                    }
+                  }
+                }
+              }
+
+              // console.log("Updated Quantities (after Transaction and MenuIngredient check):");
+              // console.log("Bread Rolls: ", breadRollsQuantity);
+              // console.log("Mayonnaise: ", mayonnaiseQuantity);
+              // console.log("Mustard: ", mustardQuantity);
+              // console.log("Ranch Dressing: ", ranchDressingQuantity);
+              // console.log("Sliced Turkey: ", slicedTurkeyQuantity);
+              // console.log("Sliced Ham: ", sliceHamQuantity);
+              // console.log("Rotissere Chicken: ", rotissereChickenQuantity);
+              // console.log("Bacon: ", baconQuantity);
+              // console.log("Cheese: ", cheeseQuantity);
+              // console.log("Lettuce: ", lettuceQuantity);
+              // console.log("Tomato: ", tomatoQuantity);
+
+              for (const inventoryTransaction of inventoryTransactions) {
+                const inventoryTransactionID = inventoryTransaction.inventoryTransactionID;
+
+                // Find the corresponding line items for the current inventory transaction
+                const relevantLineItems = inventoryTransactionsLineItems.filter(
+                  (lineItem) => lineItem.InventoryTransactionID === inventoryTransactionID
+                );
+                
+                try {
+                for (const lineItem of relevantLineItems) {
+                  const ingredientID = lineItem.ingredientID;
+                  const quantity = lineItem.quantity;
+
+                  switch (ingredientID) {
+                    case 1:
+                      breadRollsQuantity -= quantity;
+                      break;
+                    case 2:
+                      mayonnaiseQuantity -= quantity;
+                      break;
+                    case 3:
+                      mustardQuantity -= quantity;
+                      break;
+                    case 4:
+                      ranchDressingQuantity -= quantity;
+                      break;
+                    case 5:
+                      slicedTurkeyQuantity -= quantity;
+                      break;
+                    case 6:
+                      sliceHamQuantity -= quantity;
+                      break;
+                    case 7:
+                      rotissereChickenQuantity -= quantity;
+                      break;
+                    case 8:
+                      baconQuantity -= quantity;
+                      break;
+                    case 9:
+                      cheeseQuantity -= quantity;
+                      break;
+                    case 10:
+                      lettuceQuantity -= quantity;
+                      break;
+                    case 11:
+                      tomatoQuantity -= quantity;
+                      break;
+                    default:
+                      console.log("unexpected case");
+                      // Handle unexpected cases
+                      break;
+                  }
+                }
+              } catch (error) {
+                console.error("Error in the loop:", error);
+              }
+            }
+
+              // console.log("Updated Quantities (after inventoryTransaction check):");
+              // console.log("Bread Rolls: ", breadRollsQuantity);
+              // console.log("Mayonnaise: ", mayonnaiseQuantity);
+              // console.log("Mustard: ", mustardQuantity);
+              // console.log("Ranch Dressing: ", ranchDressingQuantity);
+              // console.log("Sliced Turkey: ", slicedTurkeyQuantity);
+              // console.log("Sliced Ham: ", sliceHamQuantity);
+              // console.log("Rotissere Chicken: ", rotissereChickenQuantity);
+              // console.log("Bacon: ", baconQuantity);
+              // console.log("Cheese: ", cheeseQuantity);
+              // console.log("Lettuce: ", lettuceQuantity);
+              // console.log("Tomato: ", tomatoQuantity);
+
+              for (const deliveryOrder of deliveriesOrders) {
+                for (const deliveryLineItem of deliveriesLineItems) {
+                  if (deliveryLineItem.deliveryOrderID === deliveryOrder.deliveryOrderID) {
+                    const ingredientID = deliveryLineItem.ingredientID;
+                    const deliveredQuantity = deliveryLineItem.deliveredQuantity;
+
+                    switch (ingredientID) {
+                      case 1:
+                        breadRollsQuantity += deliveredQuantity;
+                        break;
+                      case 2:
+                        mayonnaiseQuantity += deliveredQuantity;
+                        break;
+                      case 3:
+                        mustardQuantity += deliveredQuantity;
+                        break;
+                      case 4:
+                        ranchDressingQuantity += deliveredQuantity;
+                        break;
+                      case 5:
+                        slicedTurkeyQuantity += deliveredQuantity;
+                        break;
+                      case 6:
+                        sliceHamQuantity += deliveredQuantity;
+                        break;
+                      case 7:
+                        rotissereChickenQuantity += deliveredQuantity;
+                        break;
+                      case 8:
+                        baconQuantity += deliveredQuantity;
+                        break;
+                      case 9:
+                        cheeseQuantity += deliveredQuantity;
+                        break;
+                      case 10:
+                        lettuceQuantity += deliveredQuantity;
+                        break;
+                      case 11:
+                        tomatoQuantity += deliveredQuantity;
+                        break;
+                      default:
+                        console.log("unexpected case");
+                        // Handle unexpected cases
+                        break;
+                    }
+                  }
+                }
+              }
+
+              // Loop through deliveriesInventoryTransactions
+              for (const deliveryTransaction of deliveriesInventoryTransactions) {
+                for (const deliveryTransactionLineItem of deliveriesLineItems) {
+                  if (deliveryTransactionLineItem.deliveryTransactionID === deliveryTransaction.deliveryTransactionID) {
+                    const ingredientID = deliveryTransactionLineItem.ingredientID;
+                    const deliveredQuantity = deliveryTransactionLineItem.deliveredQuantity;
+
+                    switch (ingredientID) {
+                      case 1:
+                        breadRollsQuantity += deliveredQuantity;
+                        break;
+                      case 2:
+                        mayonnaiseQuantity += deliveredQuantity;
+                        break;
+                        case 3:
+                        mustardQuantity += deliveredQuantity;
+                        break;
+                      case 4:
+                        ranchDressingQuantity += deliveredQuantity;
+                        break;
+                      case 5:
+                        slicedTurkeyQuantity += deliveredQuantity;
+                        break;
+                      case 6:
+                        sliceHamQuantity += deliveredQuantity;
+                        break;
+                      case 7:
+                        rotissereChickenQuantity += deliveredQuantity;
+                        break;
+                      case 8:
+                        baconQuantity += deliveredQuantity;
+                        break;
+                      case 9:
+                        cheeseQuantity += deliveredQuantity;
+                        break;
+                      case 10:
+                        lettuceQuantity += deliveredQuantity;
+                        break;
+                      case 11:
+                        tomatoQuantity += deliveredQuantity;
+                        break;
+                      default:
+                        console.log("unexpected case");
+                        // Handle unexpected cases
+                        break;
+                    }
+                  }
+                }
+              }
+
+              console.log("Final Quantities:");
+              console.log("Bread Rolls: ", breadRollsQuantity);
+              console.log("Mayonnaise: ", mayonnaiseQuantity);
+              console.log("Mustard: ", mustardQuantity);
+              console.log("Ranch Dressing: ", ranchDressingQuantity);
+              console.log("Sliced Turkey: ", slicedTurkeyQuantity);
+              console.log("Sliced Ham: ", sliceHamQuantity);
+              console.log("Rotissere Chicken: ", rotissereChickenQuantity);
+              console.log("Bacon: ", baconQuantity);
+              console.log("Cheese: ", cheeseQuantity);
+              console.log("Lettuce: ", lettuceQuantity);
+              console.log("Tomato: ", tomatoQuantity);
 
               // Prepare data for inventory log
               const inventoryLogObject = {
@@ -118,6 +550,83 @@
                 };
 
                 ingredients.push(ingredientObject);
+              }
+
+              let discrepancyDetected = false,
+              totalExpectedQuantity = 0,
+              totalActualQuantity = 0,
+              degree,
+              message,
+              inventoryDiscrepancyObject;
+
+              inventoryDiscrepancyLineItems = [];
+              ingredientNames = [
+                breadRollsQuantity, 
+                mayonnaiseQuantity, 
+                mustardQuantity, 
+                ranchDressingQuantity,
+                slicedTurkeyQuantity,
+                sliceHamQuantity,
+                rotissereChickenQuantity,
+                baconQuantity,
+                cheeseQuantity,
+                lettuceQuantity,
+                tomatoQuantity
+              ]
+
+              for (let i = 1; i <= 11; i++) {
+                const inputID = "ingredient" + i;
+                const expectedQuantity = ingredientNames[i - 1];
+
+                const actualQuantity = parseInt(document.getElementById(inputID).value);
+
+                totalExpectedQuantity += expectedQuantity;
+                totalActualQuantity += actualQuantity;
+
+                if (expectedQuantity !== actualQuantity) {
+                  discrepancyDetected = true;
+
+                  const discrepancyItem = {
+                    inventoryLogID: latestLogID + 1,
+                    ingredientID: i,
+                    expectedQuantity: expectedQuantity,
+                    actualQuantity: actualQuantity,
+                    difference: 1 - Math.round((actualQuantity / expectedQuantity) * 10000) / 10000,
+                  };
+
+                  inventoryDiscrepancyLineItems.push(discrepancyItem);
+                }
+              }
+
+              const totalDifference = 1 - Math.round((totalActualQuantity / totalExpectedQuantity) * 10000) / 10000;
+              if (totalDifference === 0) {
+                degree = 0;
+                message = "The inventory log was saved successfully."
+              } else if ( totalDifference < 0) {
+                degree = 1;
+                message = "The inventory log was saved successfully. The on hand quantity was higher than expected. Visit Reporting & Analytics for more information."
+              } else if (totalDifference < 0.015) {
+                degree = 2;
+                message = "The inventory log was saved successfully. The on hand quantity was less than expected, but not by a significant margin. Visit Reporting & Analytics for more information."
+              } else if (totalDifference >= 0.015 && totalDifference < 0.02) {
+                degree = 3;
+                message = "The inventory log was saved successfully. The on hand quantity was less than expected by a significant. Visit Reporting & Analytics for more information."
+              } else if (totalDifference >= 0.02 && totalDifference < 0.05) {
+                degree = 4;
+                message = "The inventory log was saved successfully. The on hand quantity was less than expected by a critical margin. Visit Reporting & Analytics for more information."
+              } else {
+                degree = 5;
+                message = "The inventory log was saved successfully. The on hand quantity was less than expected by an extremely critical margin. Visit Reporting & Analytics for more information."
+              }
+
+              if (discrepancyDetected === true) {
+                inventoryDiscrepancyObject = {
+                  inventoryLogID: latestLogID + 1,
+                  locationID: userInfo.locationID,
+                  dateAndTime: getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "),
+                  totalDifference: totalDifference,
+                  degree: degree
+                }
               }
 
               // Post inventory log
@@ -147,15 +656,50 @@
                   return;
                 }
               }
+
+              if (discrepancyDetected === true) {
+                // Post inventory log
+                try {
+                  const postDiscrepancyResponse = await fetch(`/api/inventoryLogs/inventoryDiscrepancies`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(inventoryDiscrepancyObject),
+                  });
+                } catch (error) {
+                  console.error('Error posting discrepancy:', error);
+                  // setResultMessage('An error occurred. Please try again later.', 'error');
+                }
+
+                // Post inventory log line items
+                for (const discrepancyItem of inventoryDiscrepancyLineItems) {
+                  try {
+                    const postDiscrepancyLineItemsResponse = await fetch(`/api/inventoryLogs/inventoryDiscrepancies/lineItems`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(discrepancyItem),
+                    });
+
+                    const result = await postDiscrepancyLineItemsResponse.json();
+                  } catch (error) {
+                    console.error('Error posting line item:', error);
+                    // setResultMessage('An error occurred. Please try again later.', 'error');
+                    return;
+                  }
+                }
+              }
               
-              setResultMessage('The inventory log was saved successfully.', 'success');
+              setResultMessage(message, 'success');
 
             } catch (error) {
               console.error('Error:', error);
-              setResultMessage('An error occurred. Please try again later.', 'error');
+              // setResultMessage('An error occurred. Please try again later.', 'error');
             }
-          });
-        });
+          }
+          )});
       </script>
     </div>
   </body>

@@ -1,178 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>Lunch Rush Database</title>
-    <link href="styles.css" rel="stylesheet" />
-    <link rel="icon" href="../favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
-    <script src="/common.js"></script>
+	<meta charset="utf-8" />
+	<title>Lunch Rush Database</title>
+	<link href="styles.css" rel="stylesheet" />
+	<link rel="icon" href="../favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+	<script src="/common.js"></script>
   </head>
   <body>
-    <header>
-      <div id="header-image">
-        <img src="Lunch_Rush_3.png" />
-      </div>
-    </header>
-    <div id="grid-container">
-      <nav>
-        <ul>
-          <li><a href="/index.html">Home</a></li>
-          <li><a href="/stores.html">Stores</a></li>
-          <li><a href="/menu.html">Menu</a></li>
-          <li><a href="/inventory.html">Log Inventory</a></li>
-          <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
-          <li><a href="/ordering.html">Ordering</a></li>
-          <li><a href="/deliveries.html">Deliveries</a></li>
-          <li><a href="/reporting-analytics.html">Reporting &<br>Analytics</a></li>
-          <li><a href="/account-settings.html">Account Settings</a></li>
-          <li id="logout"><a href=#>Logout</a></li>
-        </ul>
-      </nav>
-      <main>
-        <h2>Delivery Confirmation Form</h2>
-        <section id="form">
-          <form id="delivery-confirmation-form" class="dynamic-ingredient-form">
-						<div class="response-message" id="response-message"></div>
-						<div id="ingredients-container">
-              <!-- Ingredient input sections will be dynamically added here -->
-            </div>
-            <button type="button" id="add-ingredient-btn" class="submit-button">Add Ingredient...</button>
-            <label class="location-label">Location:</label>
-            <select name="locations" id="locations" class="location-selector">
-							<option value=1>678 Mountain Vista Ave</option>
-							<option value=2>981 Sunset Rd</option>
-							<option value=3>45 Eastern Rd</option>
+	<header>
+	  <div id="header-image">
+		<img src="Lunch_Rush_3.png" />
+	  </div>
+	</header>
+	<div id="grid-container">
+	  <nav>
+		<ul>
+		  <li><a href="/index.html">Home</a></li>
+		  <li><a href="/stores.html">Stores</a></li>
+		  <li><a href="/menu.html">Menu</a></li>
+		  <li><a href="/inventory.html">Log Inventory</a></li>
+		  <li><a href="/inventorytransaction.html">Exchange Inventory</a></li>
+		  <li><a href="/ordering.html">Ordering</a></li>
+		  <li><a href="/deliveries.html">Deliveries</a></li>
+		  <li><a href="/reporting-analytics.html">Reporting &<br>Analytics</a></li>
+		  <li><a href="/account-settings.html">Account Settings</a></li>
+		  <li id="logout"><a href=#>Logout</a></li>
+		</ul>
+	  </nav>
+	  <main>
+		<h2>Delivery Confirmation Form</h2>
+		<section id="form">
+		  <form id="delivery-confirmation-form" class="dynamic-ingredient-form">
+				<div class="response-message" id="response-message"></div>
+				<div class="location-radio-container">
+				<label for="order" class="delivery-type-label">Order</label>
+				<input type="radio" id="order" name="deliveryType" value="order">
+				<label for="inventoryTransaction" class="delivery-type-label">Inventory Transaction</label>
+				<input type="radio" id="inventoryTransaction" name="deliveryType" value="inventoryTransaction">
+				</div>
+				<div id="delivery-type-ID-container">
+					<div id="location-and-ID">
+						<label class="location-label" id="ID-label"></label>
+						<select name="delivery-type-ID" id="delivery-type-ID">
 						</select>
-            <div class="location-radio-container">
-              <label for="outgoing" class="location-radio-label">Outgoing Location</label>
-              <input type="radio" id="outgoing" name="locationType" value="outgoing">
-            </div>
-            <div class="location-radio-container">
-              <label for="incoming" class="location-radio-label">Incoming Location</label>
-              <input type="radio" id="incoming" name="locationType" value="incoming">
-            </div>
-            <input type="submit" value="Log Inventory Transaction" class="submit-button"/>
-          </form>
-        </section>
-      </main>
-    </div>
-    <footer>
-      <p>Group 14 IFT 402 Fall 2023</p>
-    </footer>
+					</div>
+					<br>
+					<div id="get-ingredients-btn-container">
+						<button type="button" id="get-deliveries-btn" class="submit-button">Confirm</button>
+					</div>
+				</div>
+				<div id="ingredients-container" style="margin-top: 10px;">
+					<!-- Ingredient input sections will be dynamically added here -->
+				</div>
+				<div id="submit-button-div">
+					<input type="submit" value="Confirm Delivery Quantities" class="submit-button"/>
+				</div>
+		  </form>
+		</section>
+	  </main>
+	</div>
+	<footer>
+		<p>Group 14 IFT 402 Fall 2023</p>
+	</footer>
   
-    <script>
-      var inventoryTransactionForm = document.getElementById("inventory-transaction-form");
-      var ingredientsContainer = document.getElementById("ingredients-container");
-      var addIngredientButton = document.getElementById("add-ingredient-btn");
-      var ingredientCounter = 1;
-      var deleteButton = null;
-  
-      addIngredientButton.addEventListener("click", createIngredientSection);
-  
-      createIngredientSection();
+	<script>
+		var ingredientsContainer = document.getElementById("ingredients-container");
 
-			document.addEventListener("DOMContentLoaded", function () {
-        var form = document.querySelector("form");
-        displayMessage();
+		document.addEventListener("DOMContentLoaded", async function () {
+			var form = document.querySelector("form");
+			displayMessage();
 
-				form.addEventListener("submit", async function (event) {
-					event.preventDefault();
+			var deliveryTypeIdContainer = document.getElementById("delivery-type-ID-container");
+			var IdLabel = document.getElementById("ID-label");
+			var submitButtonDiv = document.getElementById("submit-button-div");
 
-					try {
-						// Get user info
-						const userInfoResponse = await fetch('/api/users/userInfo');
-						const userInfo = await userInfoResponse.json();
+			const orderRadio = document.getElementById("order");
+			const inventoryTransactionRadio = document.getElementById("inventoryTransaction");
+			const getIngredientsBtn = document.getElementById("get-deliveries-btn");
 
-						const outgoingRadio = document.getElementById("outgoing");
-   					const incomingRadio = document.getElementById("incoming");
+			orderRadio.addEventListener("change", async function () {
+				const deliveryType = 1;
+				getIngredientsBtn.textContent = "Confirm Order ID";
+				deliveryTypeIdContainer.style.display = 'flex';
+				IdLabel.textContent = "Select the Order ID:";
+				const orderIDs = await getFormIDs(deliveryType);
+				populateSelectOptions(orderIDs);
+			});
 
-						if (!outgoingRadio.checked && !incomingRadio.checked) {
-								setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
-								return;
-						}
+			inventoryTransactionRadio.addEventListener("change", async function () {
+				const deliveryType = 2;
+				getIngredientsBtn.textContent = "Confirm Inventory Transaction ID";
+				deliveryTypeIdContainer.style.display = 'flex';
+				IdLabel.textContent = "Select the Inventory Transaction ID:";
+				const transactionIDs = await getFormIDs(deliveryType);
+				populateSelectOptions(transactionIDs);
+			});
 
-						const selectedLocationID = parseInt(document.getElementById("locations").value, 10);
+			getIngredientsBtn.addEventListener("click", async function () {
+				clearMessage();
+				const selectedDeliveryType = document.querySelector('input[name="deliveryType"]:checked');
+				const selectedDeliveryTypeID = document.getElementById("delivery-type-ID").value;
 
-						if (selectedLocationID === userInfo.locationID) {
-							setResultMessage("The location you've selected is the same as your own location. Please choose a different location.", 'error');
-							return;
-						}
+				if (!selectedDeliveryType || !selectedDeliveryTypeID) {
+				console.error("Please select delivery type and ID");
+				return;
+				}
 
-						// Get the latest inventory transaction ID
-						let outgoingLocationID, incomingLocationID;
-						if (outgoingRadio.checked) {
-							outgoingLocationID = selectedLocationID;
-							incomingLocationID = userInfo.locationID;
-						} else if (incomingRadio.checked) {
-							outgoingLocationID = userInfo.locationID;
-							incomingLocationID = selectedLocationID;
-						}
+				const lineItems = await getLineItems(selectedDeliveryType.value, selectedDeliveryTypeID);
 
-						const latestTransactionIDResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/latest/${outgoingLocationID}`);
-						const latestTransactionIDData = await latestTransactionIDResponse.json();
-						const latestTransactionID = latestTransactionIDData[0].inventoryTransactionID;
+				// Clear existing ingredients
+				ingredientsContainer.innerHTML = "";
 
-						// Prepare data for inventory transaction
-						const inventoryTransactionObject = {
-							inventoryTransactionID: latestTransactionID + 1,
-							outgoingLocationID: outgoingLocationID,
-							incomingLocationID: incomingLocationID,
-							date: getCurrentDateInPhoenix(),
+				// Display line items in the ingredients container
+				lineItems.forEach(item => {
+				createDeliveryIngredientSection(item.ingredientID, item.ingredientName, item.quantity);
+				});
+
+				submitButtonDiv.style.display = "flex"
+			});
+
+			async function getLineItems(deliveryType, deliveryTypeID) {
+				try {
+					const response = await fetch(`/api/${deliveryType}s/${deliveryType}s/lineItems/${deliveryTypeID}`);
+					const data = await response.json();
+					return data;
+				} catch (error) {
+					// console.error('Error fetching line items:', error);
+					// setResultMessage('An error occurred. Please try again later.', 'error');
+					// return [];
+				}
+			}
+
+			function createDeliveryIngredientSection(ingredientID, ingredientName, expectedQuantity) {
+				var div = document.createElement("div");
+				var nameLabel = document.createElement("label");
+				var quantityDiv = document.createElement("div");
+				var quantityInput = document.createElement("input");
+				var measurementUnit = document.createElement("span");
+				var quantityLabel = document.createElement("span");
+				var expectedQuantityLabel = document.createElement("span");
+
+				div.className = "ingredient-section";
+				quantityInput.id = "quantity-" + ingredientID;
+				quantityInput.className = "form-input-box";
+				quantityLabel.className = "quantity-label";
+				quantityLabel.textContent = "Delivered Quantity: ";
+				nameLabel.textContent = ingredientName;
+				quantityDiv.className = "quantity-div";
+				quantityInput.type = "number";
+				quantityInput.name = "quantity-" + ingredientID;
+				quantityInput.required = true;
+				quantityInput.min = "0";
+				quantityInput.value = expectedQuantity;
+
+				measurementUnit.id = "measurementUnit-" + ingredientID;
+				measurementUnit.className = "measurement-unit-span"
+				measurementUnit.textContent = updateDeliveryMeasurementUnit(ingredientID);
+
+				expectedQuantityLabel.textContent = `Expected: ${expectedQuantity}`;
+
+				
+				quantityDiv.appendChild(quantityLabel);
+				quantityDiv.appendChild(quantityInput);
+				quantityDiv.appendChild(measurementUnit);
+				div.appendChild(nameLabel);
+				div.appendChild(quantityDiv);
+				div.appendChild(expectedQuantityLabel);
+
+				ingredientsContainer.appendChild(div);
+			}
+
+			function updateDeliveryMeasurementUnit(ingredientID) {
+				if (ingredientID == 1) {
+					return "Rolls";
+				} else if (ingredientID >= 2 && ingredientID <= 4) {
+					return "Fl oz";
+				} else {
+					return "Oz";
+				}
+			};
+
+			form.addEventListener("submit", async function (event) {
+				event.preventDefault();
+				let message;
+
+				try {
+					// Get user info
+					const userInfoResponse = await fetch('/api/users/userInfo');
+					const userInfo = await userInfoResponse.json();
+					const locationID = userInfo.locationID;
+
+					const latestDeliveryIDResponse = await fetch(`/api/deliveries/deliveries/latest/${locationID}`);
+					const latestDeliveryIDData = await latestDeliveryIDResponse.json();
+					const latestDeliveryID = latestDeliveryIDData[0].deliveryID;
+
+					const selectedDeliveryType = document.querySelector('input[name="deliveryType"]:checked');
+					const selectedDeliveryTypeID = document.getElementById("delivery-type-ID").value;
+
+					const expectedQuantityArray= []
+					let deliveryObject;
+					let discrepancies = false;
+
+					if (orderRadio.checked) {
+						const orderResponse = await fetch(`/api/orders/orders/latest/${selectedDeliveryTypeID}`);
+						const order = await orderResponse.json();
+						const lineItems = await getLineItems(selectedDeliveryType.value, selectedDeliveryTypeID);
+						lineItems.forEach(item => {
+							const ingredientID = item.ingredientID;
+							const expectedQuantity = item.quantity;
+							const deliveredQuantity = parseInt(document.getElementById(`quantity-${ingredientID}`).value);
+
+							if (deliveredQuantity !== expectedQuantity) {
+								discrepancies = true;
+							}
+							expectedQuantityArray.push(expectedQuantity);
+						});
+						if (discrepancies) {
+							deliveryObject = {
+								deliveryID: latestDeliveryID + 1, 
+								deliveryType: 1, 
+								orderID: parseInt(document.getElementById("delivery-type-ID").value), 
+								locationID : locationID, 
+								dateAndTime : getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "), 
+								discrepancies: 1
+							} 
+						} else {
+							deliveryObject = {
+								deliveryID: latestDeliveryID + 1, 
+								deliveryType: 1, 
+								orderID: parseInt(document.getElementById("delivery-type-ID").value), 
+								locationID : locationID, 
+								dateAndTime : getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "), 
+								discrepancies: 0	
+							}
+						};
+					} else if (inventoryTransactionRadio.checked) {
+						const inventoryTransactionResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/latest/${selectedDeliveryTypeID}`);
+						const inventoryTransaction = await inventoryTransactionResponse.json();
+						const lineItems = await getLineItems(selectedDeliveryType.value, selectedDeliveryTypeID);
+						lineItems.forEach(item => {
+							const ingredientID = item.ingredientID;
+							const expectedQuantity = item.quantity;
+							const deliveredQuantity = parseInt(document.getElementById(`quantity-${ingredientID}`).value);
+
+							if (deliveredQuantity !== expectedQuantity) {
+								discrepancies = true;
+							}
+							expectedQuantityArray.push(expectedQuantity);
+						});
+						if (discrepancies) {
+							deliveryObject = {
+								deliveryID: latestDeliveryID + 1, 
+								deliveryType: 2, 
+								inventoryTransactionID: parseInt(document.getElementById("delivery-type-ID").value), 
+								locationID : locationID, 
+								dateAndTime : getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "), 
+								discrepancies: 1
+							}					
+						} else {
+							 deliveryObject = {
+								deliveryID: latestDeliveryID + 1, 
+								deliveryType: 1, 
+								inventoryTransactionID: parseInt(document.getElementById("delivery-type-ID").value), 
+								locationID : locationID, 
+								dateAndTime : getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " "), 
+								discrepancies: 0	
+							}
+						};
+					}
+
+					if (discrepancies === true) {
+						message = "Delivery was saved successfully. Discrepancies were noted and can be viewed in Reporting & Analytics."
+					} else {
+						message = "Delivery was saved successfully."
+					}
+
+					// Prepare data for inventory transaction line items
+					const ingredients = [];
+					const ingredientSections = document.querySelectorAll('.ingredient-section');
+					var loopCounter = 0;
+
+					ingredientSections.forEach(section => {
+						const ingredientID = section.querySelector('input[type="number"]').id.split('-')[1];
+						const quantity = parseInt(document.getElementById(`quantity-${ingredientID}`).value);
+
+						const ingredientObject = {
+							deliveryID: deliveryObject.deliveryID,
+							ingredientID: parseInt(ingredientID),
+							deliveredQuantity: quantity,
+							expectedQuantity: expectedQuantityArray[loopCounter],
 						};
 
-						// Prepare data for inventory transaction line items
-						const ingredients = [];
-						for (let i = 1; i < ingredientCounter; i++) {
-							const ingredientID = parseInt(document.getElementById(`ingredient-${i}`).value);
-							const inputID = "ingredient-" + i;
-							const quantity = parseInt(document.getElementById(`quantity-${i}`).value);
+						ingredients.push(ingredientObject);
+						loopCounter++;
+					});
 
-							const ingredientObject = {
-								inventoryTransactionID: inventoryTransactionObject.inventoryTransactionID,
-								ingredientID: ingredientID,
-								quantity: quantity,
-							};
+					console.log("deliveryObject :");
+					console.log(deliveryObject);
+					console.log("")
+					console.log("ingredients :");
+					console.log(ingredients);
 
-							ingredients.push(ingredientObject);
-						}
-
-						// Post inventory transaction
-						const postTransactionResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions`, {
+					// Post delivery
+					if (orderRadio.checked) {
+						const postDeliveryResponse = await fetch(`/api/deliveries/deliveries/order`, {
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json',
 							},
-							body: JSON.stringify(inventoryTransactionObject),
+							body: JSON.stringify(deliveryObject),
 						});
+					} else if (inventoryTransactionRadio.checked) {
+						const postDeliveryResponse = await fetch(`/api/deliveries/deliveries/inventoryTransaction`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(deliveryObject),
+						});
+					}
 
-						// Post inventory transaction line items
-						for (const ingredientObject of ingredients) {
-							try {
-								const postLineItemsResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/lineItems`, {
-									method: 'POST',
-									headers: {
-										'Content-Type': 'application/json',
-									},
-									body: JSON.stringify(ingredientObject),
-								});
+					// Post delivery line items
+					for (const ingredientObject of ingredients) {
+						try {
+							const postLineItemsResponse = await fetch(`/api/deliveries/deliveries/lineItems`, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify(ingredientObject),
+							});
 
-								const result = await postLineItemsResponse.json();
-							} catch (error) {
-								console.error('Error posting line item:', error);
-								setResultMessage('An error occurred. Please try again later.', 'error');
-								return;
-							}
-						}
-								
-						setResultMessage('The inventory transaction was saved successfully.', 'success');
-
+							const result = await postLineItemsResponse.json();
 						} catch (error) {
-							console.error('Error:', error);
-								setResultMessage('An error occurred. Please try again later.', 'error');
+							console.error('Error posting line item:', error);
+							// setResultMessage('An error occurred. Please try again later.', 'error');
+							return;
 						}
-				});
+					}
+								
+					setResultMessage(message, 'success');
+
+				} catch (error) {
+					console.error('Error:', error);
+					// setResultMessage('An error occurred. Please try again later.', 'error');
+				}
 			});
-    </script>
+		});
+
+		async function getFormIDs(deliveryType) {
+			try {
+				const userInfoResponse = await fetch('/api/users/userInfo');
+				const userInfo = await userInfoResponse.json();
+				const locationID = userInfo.locationID;
+
+				let orderIDResponse, inventoryTransactionIDResponse;
+				let orderDeliveries = [], inventoryTransactionDeliveries = [];
+
+				if (deliveryType === 1) {
+					orderIDResponse = await fetch(`api/orders/orders/${locationID}`);
+					orderDeliveries = await fetch(`api/deliveries/orders/${locationID}`).then(response => response.json());
+				} else if (deliveryType === 2) {
+					inventoryTransactionIDResponse = await fetch(`api/inventoryTransactions/inventoryTransactions/incoming/${locationID}`);
+					inventoryTransactionDeliveries = await fetch(`api/deliveries/inventoryTransactions/${locationID}`).then(response => response.json());
+				}
+
+				const orderID = orderIDResponse ? await orderIDResponse.json() : [];
+				// console.log("orderDeliveries: ", orderDeliveries);
+				// console.log("orderID: ", orderID);
+				const inventoryTransactionID = inventoryTransactionIDResponse ? await inventoryTransactionIDResponse.json() : [];
+				// console.log("inventoryTransactionDeliveries: ", inventoryTransactionDeliveries);
+				// console.log("inventoryTransactionID: ", inventoryTransactionID);
+
+				const deliveryIDField = deliveryType === 1 ? 'orderID' : 'inventoryTransactionID';
+
+				const filteredOrderIDs = orderID.filter(id => !orderDeliveries.some(delivery => delivery[deliveryIDField] === id[deliveryIDField]));
+   				const filteredInventoryTransactionIDs = inventoryTransactionID.filter(id => !inventoryTransactionDeliveries.some(delivery => delivery[deliveryIDField] === id[deliveryIDField]));
+
+				const options = deliveryType === 1 ? filteredOrderIDs : filteredInventoryTransactionIDs;
+
+				if (options.length === 0) {
+					if (deliveryType === 1) {
+						setResultMessage('All orders for your location have already had their deliveries recorded.', 'success');
+					} else if (deliveryType === 2) {
+						setResultMessage('All inventory transactions for your location have already had their deliveries recorded.', 'success');
+					}
+				}
+
+				return options;
+			} catch (error) {
+				console.error('Error:', error);
+				// setResultMessage('An error occurred. Please try again later.', 'error');
+			}
+		}
+			
+		function populateSelectOptions(options) {
+			const selectElement = document.getElementById("delivery-type-ID");
+			// Clear existing options
+			selectElement.innerHTML = "";
+			// Populate new options
+			options.forEach(option => {
+				const optionElement = document.createElement("option");
+				const idValue = option.orderID || option.inventoryTransactionID;
+				optionElement.value = idValue;
+				optionElement.textContent = idValue;
+				selectElement.appendChild(optionElement);
+			});
+		}
+	</script>
   </body>
 </html>

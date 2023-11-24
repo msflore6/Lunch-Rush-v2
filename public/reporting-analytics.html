@@ -30,16 +30,38 @@
         </ul>
       </nav>
 
-      <main>
+      <main style="margin-left: -42px;">
         <div class="flex-container">
-          <label for="locations"><h2>Reporting & Analytics</h2></label>
-          <!-- <select name="locations" id="locations">
-            <option value=1>678 Mountain Vista Ave</option>
-            <option value=2>981 Sunset Rd</option>
-            <option value=3>45 Eastern Rd</option>
-          </select> -->
-          <button id="viewInventoryDiscrepenciesBtn">View Inventory Discrepancies</button>
+          <div 
+            class="response-message" 
+            id="response-message" 
+            style="color : #000000; margin-bottom: -10px !important; margin-top: 20px !important;"
+          >
+          </div>
+          <h2>Reporting & Analytics</h2>
+          <div id="date-choice">
+            <div class="date-radio-container">
+              <label for="all-dates">Show all data</label>
+              <input type="radio" id="all-dates" name="date-option" value="all-dates" checked>
+            </div>
+            <div class="date-radio-container">
+              <label for="date-range">Show data by date range</label>
+              <input type="radio" id="date-range" name="date-option" value="date-range">
+            </div>
+          </div>
+          <div id="date-selection">
+            <span>Select a date range:</span>
+            <div class="date-container">
+              <label for="startDate">Start Date:</label>
+              <input type="date" id="startDate" name="startDate">
+            </div>
+            <div class="date-container">
+              <label for="endDate">End Date:</label>
+              <input type="date" id="endDate" name="endDate">
+            </div>
         </div>
+        <button id="viewInventoryDiscrepenciesBtn" class="view-button">View Discrepancies</button>
+        <div id="reportingTables" class="retrieved-tables"></div>
         <img
           src="sandwich.png"
           alt="a cartoon cold cuts sandwich"
@@ -52,239 +74,336 @@
     </footer>
 
     <script>
-      // var employeesArray = [];
-      // var transactionsArray = [];
-      // var ordersArray = [];
-      // var inventoryLogsArray = [];
-      // var inventoryTransactionsArray = [];
+      document.addEventListener("DOMContentLoaded", function () {
+        displayMessage();
+        const dateRangeInput = document.getElementById("date-range");
+        const allDatesInput = document.getElementById("all-dates");
+        const dateSelection = document.getElementById("date-selection");
 
-      // document.getElementById("viewStoreInfoBtn").addEventListener("click", async function () {
-      //   const locationID = parseInt(document.getElementById("locations").value, 10);
-      //   await populateArrays(locationID);
-      //   generateTables();
-      // });
+        function setRequired(isRequired) {
+            document.getElementById("startDate").required = isRequired;
+            document.getElementById("endDate").required = isRequired;
+        }
 
-      // async function populateArrays(locationID) {
-      //   employeesArray = await fetchData('employees', locationID);
-      //   transactionsArray = await fetchData('transactions', locationID);
-      //   ordersArray = await fetchData('orders', locationID);
-      //   inventoryLogsArray = await fetchData('inventoryLogs', locationID);
-      //   inventoryTransactionsArray = await fetchData('inventoryTransactions', locationID);
-      // }
+        if (dateRangeInput) {
+          dateRangeInput.addEventListener("change", function () {
+            if (this.checked) {
+              dateSelection.classList.add("show");
+              setRequired(true);
+            }
+          });
+        }
 
-      // async function fetchData(endpoint, locationID, array) {
-      //   const response = await fetch(`/api/${endpoint}/${endpoint}/${locationID}`);
-      //   return response.json();
-      // }
+        if (allDatesInput) {
+          allDatesInput.addEventListener("change", function () {
+            if (this.checked) {
+              dateSelection.classList.remove("show");
+              setRequired(false);
+            }
+          });
+        }
 
-      // function formatDateTime(dateTimeString) {
-      //   const options = { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
-      //   return new Date(dateTimeString).toLocaleDateString('en-US', options);
-      // }
 
-      // function formatDate(dateString) {
-      //   const options = { month: 'numeric', day: 'numeric', year: 'numeric' };
-      //   return new Date(dateString).toLocaleDateString('en-US', options);
-      // }
+        document.getElementById("viewInventoryDiscrepenciesBtn").addEventListener("click", async function () {
+          const userInfoResponse = await fetch('/api/users/userInfo');
+          const userInfo = await userInfoResponse.json();
+          const locationID = userInfo.locationID;
 
-      // function generateTables() {
-      //   // Clear existing tables
-      //   document.getElementById("locationTables").innerHTML = "";
+          if (!dateRangeInput.checked && !allDatesInput.checked) {
+            setResultMessage("Please choose whether you would like to view entries for all dates or a specific date range.", 'error');
+            return;
+          } else if (allDatesInput.checked) {
+            clearMessage();
+            message = "No data found.";
+            await populateArrays(locationID);
+            generateTables();
+            checkArraysAndDisplayMessage(message);
+          } else if (dateRangeInput.checked) {
+            clearMessage();
+            message = "No data found for selected date range.";
+            const startDateInput = document.getElementById("startDate").value;
+            const endDateInput = document.getElementById("endDate").value;
 
-      //   var tableData = {
-      //     employees: employeesArray,
-      //     transactions: transactionsArray,
-      //     orders: ordersArray,
-      //     inventoryLogs: inventoryLogsArray,
-      //     inventoryTransactions: inventoryTransactionsArray
-      //   };
+            if (!startDateInput || !endDateInput) {
+                setResultMessage("Please enter both start and end dates.", 'error');
+                return;
+            }
 
-      //   for (var key in tableData) {
-      //     var tableContainer = document.createElement("div");
-      //     tableContainer.className = "table-container-div";
+            const startDate = new Date(startDateInput).toISOString().slice(0, 10) + ' 00:00:00';
+            const endDate = new Date(endDateInput).toISOString().slice(0, 10) + ' 23:59:59';
 
-      //     var tableTitle = document.createElement("span");
-      //     tableTitle.textContent = key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2'); // Add space between camelCase words
-      //     tableTitle.textContent = tableTitle.textContent.charAt(0).toUpperCase() + tableTitle.textContent.slice(1); // Capitalize the first letter
-      //     tableContainer.appendChild(tableTitle);
+            await populateArraysByDate(locationID, startDate, endDate);
+            generateTables();
+            checkArraysAndDisplayMessage(message);
+          }
+        });
+      });
 
-      //     var table = document.createElement("table");
-      //     var header = document.createElement("thead");
-      //     var headerRow = document.createElement("tr");
+      var inventoryDiscrepanciesArray = [];
+      var deliveriesInventoryTransactionsArray = [];
+      var deliveriesOrdersArray = [];
 
-      //     var columns;
-      //     switch (key) {
-      //       case "employees":
-      //         columns = ["Employee ID", "First Name", "Last Name", "Job Role"];
-      //         break;
-      //       case "transactions":
-      //         columns = ["Transaction ID", "Date and Time", "Balance", "Employee ID"];
-      //         break;
-      //       case "orders":
-      //         columns = ["Order ID", "Username", "Date and Time"];
-      //         break;
-      //       case "inventoryLogs":
-      //         columns = ["Inventory Log ID", "Date and Time"];
-      //         break;
-      //       case "inventoryTransactions":
-      //         columns = ["Inventory Transaction ID", "Outgoing Location ID", "Incoming Location ID", "Date"];
-      //         break;
-      //       default:
-      //         columns = []; // Empty array for unknown table types
-      //     }
+      async function populateArrays(locationID) {
+        inventoryDiscrepanciesArray = await fetchData('inventoryLogs', 'inventoryDiscrepancies', locationID);
+        deliveriesInventoryTransactionsArray = await fetchData('deliveries', 'inventoryTransactionsReporting', locationID);
+        deliveriesOrdersArray = await fetchData('deliveries', 'ordersReporting', locationID);
+      }
 
-      //     columns.forEach(function (column) {
-      //       var th = document.createElement("th");
-      //       th.textContent = column;
-      //       headerRow.appendChild(th);
-      //     });
+      async function populateArraysByDate(locationID, startDate, endDate) {
+        inventoryDiscrepanciesArray = await fetchData('inventoryLogs', 'inventoryDiscrepancies', locationID);
+        deliveriesInventoryTransactionsArray = await fetchDataByDate('deliveries', 'inventoryTransactionsReporting', locationID, startDate, endDate);
+        deliveriesOrdersArray = await fetchDataByDate('deliveries', 'ordersReporting', locationID, startDate, endDate);
+      }
 
-      //     header.appendChild(headerRow);
-      //     table.appendChild(header);
+      async function fetchData(firstEndpoint, secondEndpoint, locationID) {
+        const response = await fetch(`/api/${firstEndpoint}/${secondEndpoint}/${locationID}`);
+        return response.json();
+      }
 
-      //     tableData[key].forEach(function (data) {
-      //       var row = document.createElement("tr");
+      async function fetchDataByDate(firstEndpoint, secondEndpoint, locationID, startDate, endDate) {
+        const response = await fetch(`/api/${firstEndpoint}/${secondEndpoint}/${locationID}/${startDate}/${endDate}`);
+        return response.json();
+      }
 
-      //       for (var prop in data) {
-      //         var cell = document.createElement("td");
-              
-      //         if (prop.toLowerCase().includes("id")) {
-      //           if (key !== "employees" && !["employeeid", "outgoinglocationid", "incominglocationid"].includes(prop.toLowerCase())) {
-      //             var link = document.createElement("a");
-      //             link.href = "#"; // Set the href attribute to "#" for now
-      //             link.textContent = data[prop];
+      function generateTables() {
+        // Clear existing tables
+        document.getElementById("reportingTables").innerHTML = "";
+        let lineItemKey1, lineItemKey2;
+        const allDatesInput = document.getElementById("all-dates");
+        const dateRangeInput = document.getElementById("date-range");
 
-      //           function createEventListener(id, tableKey) {
-      //             return function (event) {
-      //               event.preventDefault();
-      //               openPopup(id, tableKey);
-      //             };
-      //           }
+        var tableData = {
+          inventoryDiscrepancies: inventoryDiscrepanciesArray,
+          inventoryTransactionDeliveries: deliveriesInventoryTransactionsArray,
+          orderDeliveries: deliveriesOrdersArray,
+        };
 
-      //           link.addEventListener("click", createEventListener(data[prop], key));
+        if (
+          Object.keys(tableData).every(
+            (key) => Array.isArray(tableData[key]) && tableData[key].length === 0
+          )
+        ) {
+          if (allDatesInput.checked) { 
+            setResultMessage("No data was found.", "success");
+            return;
+          } else if (dateRangeInput.checked) {
+            setResultMessage("No data was found for the selected date range.", "success");
+            return;
+          }
+        }
 
-      //           cell.textContent = ""; // Clear the cell content
-      //           cell.appendChild(link);
-      //           } else {
-      //             cell.textContent = data[prop];
-      //           }
-      //         } else if (prop.toLowerCase() === "jobrole" && key === "employees") {
-      //           switch (data[prop]) {
-      //             case 1:
-      //               cell.textContent = "FOH";
-      //               break;
-      //             case 2:
-      //               cell.textContent = "BOH";
-      //               break;
-      //             case 3:
-      //               cell.textContent = "Manager";
-      //               break;
-      //             default:
-      //               cell.textContent = "Unknown";
-      //           }
-      //         } else if (key === "inventoryTransactions" && prop.toLowerCase() === "transactiondate") {
-      //           cell.textContent = formatDate(data[prop]);
-      //         } else if (prop.toLowerCase().includes("date") || prop.toLowerCase().includes("time")) {
-      //           cell.textContent = formatDateTime(data[prop]);
-      //         } else if (key === "transactions" && prop.toLowerCase() === "balance") {
-      //           const formattedBalance = parseFloat(data[prop]).toFixed(2);
-      //           cell.textContent = "$" + formattedBalance;
-      //         } else {
-      //           cell.textContent = data[prop];
-      //         }
-
-      //         row.appendChild(cell);
-      //       }
-
-      //       table.appendChild(row);
-      //     });
-
-      //     tableContainer.appendChild(table);
-
-      //     document.getElementById("locationTables").appendChild(tableContainer);
-      //   }
-      // }
-
-      // document.getElementById("viewStoreInfoBtn").addEventListener("click", function() {
-      //   var locationID = parseInt(document.getElementById("locations").value, 10);
-      //   populateArrays(locationID);
-      //   generateTables(locationID);
-      // });
-
-      // async function openPopup(id, key) {
-      //   const lineItemsPromise = fetchLineItems(id, key);
-
-      //   const lineItems = await lineItemsPromise;
-
-      //   if (Array.isArray(lineItems)) {
-      //     const lineItemsTable = generateLineItemsTable(lineItems);
-      //     lineItemsTable.id = "lineItemsTable";
-      //     const popupWindow = window.open("", "_blank", "width=600,height=400");
-      //     const style = popupWindow.document.createElement("style");
-
-      //     style.textContent = `
-      //       #lineItemsTable {
-      //         margin-top: 20px !important;
-      //       }
-
-      //       #lineItemsTable table {
-      //         width: 100% !important;
-      //         border-collapse: collapse !important;
-      //         margin-bottom: 10px !important;
-      //       }
-
-      //       #lineItemsTable th, #lineItemsTable td {
-      //         border: 1px solid black !important;
-      //         padding: 8px !important;
-      //         text-align: left !important;
-      //       }
-
-      //       #lineItemsTable th {
-      //         background-color: #f2f2f2 !important;
-      //       }
-      //     `;
+        for (var key in tableData) {
+          if (tableData[key].length === 0) {
+            continue; // Skip generating the table if the array is empty
+          }
           
-      //     popupWindow.document.head.appendChild(style);
+          var tableContainer = document.createElement("div");
+          tableContainer.className = "table-container-div";
 
-      //     popupWindow.document.body.appendChild(lineItemsTable);
-      //   } else {
-      //     console.error("Error: lineItems is not an array");
-      //   }
-      // }
+          var tableTitle = document.createElement("span");
+          tableTitle.textContent = key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2'); // Add space between camelCase words
+          tableTitle.textContent = tableTitle.textContent.charAt(0).toUpperCase() + tableTitle.textContent.slice(1); // Capitalize the first letter
+          tableTitle.style.textAlign = "left";
+          tableContainer.appendChild(tableTitle);
 
-      // async function fetchLineItems(id, key) {
-      //   const response = await fetch(`/api/${key}/${key}/lineItems/${id}`);
-      //   return response.json();
-      // }
+          var table = document.createElement("table");
+          var header = document.createElement("thead");
+          var headerRow = document.createElement("tr");
 
-      // function generateLineItemsTable(lineItems) {
-      //   var table = document.createElement("table");
-      //   var headerRow = document.createElement("tr");
+          var columns;
+          switch (key) {
+            case "inventoryDiscrepancies":
+              columns = ["Inventory Log ID", "Date and Time", "Total Difference", "Degree"];
+              lineItemKey1 = "inventoryLogs";
+              lineItemKey2 = "inventoryDiscrepancies";
+              break;
+            case "inventoryTransactionDeliveries":
+              columns = ["DeliveryID", "Inventory Transaction ID", "Date And Time"];
+              lineItemKey1 = "deliveries";
+              lineItemKey2 = "deliveries";
+              break;
+            case "orderDeliveries":
+              columns = ["DeliveryID", "Order ID", "Date And Time"];
+              lineItemKey1 = "deliveries";
+              lineItemKey2 = "deliveries";
+              break;
+            default:
+              columns = []; // Empty array for unknown table types
+          }
 
-      //   for (var prop in lineItems[0]) {
-      //     var th = document.createElement("th");
-      //     th.textContent = prop.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
-      //     th.textContent = th.textContent.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-      //     headerRow.appendChild(th);
-      //   }
+          columns.forEach(function (column) {
+            var th = document.createElement("th");
+            th.textContent = column;
+            headerRow.appendChild(th);
+          });
 
-      //   table.appendChild(headerRow);
+          header.appendChild(headerRow);
+          table.appendChild(header);
 
-      //   // Create a row for each line item
-      //   lineItems.forEach(function (item) {
-      //     var row = document.createElement("tr");
+          tableData[key].forEach(function (data) {
+            var row = document.createElement("tr");
 
-      //     for (var prop in item) {
-      //       var cell = document.createElement("td");
-      //       cell.textContent = item[prop];
-      //       row.appendChild(cell);
-      //     }
+            for (var prop in data) {
+              var cell = document.createElement("td");
+              
+              if (prop.toLowerCase().includes("id")) {
+                if (key !== "employees" && !["inventorytransactionid", "orderid"].includes(prop.toLowerCase())) {
+                  var link = document.createElement("a");
+                  link.href = "#";
+                  link.textContent = data[prop];
 
-      //     table.appendChild(row);
-      //   });
+                function createEventListener(id, lineItemKey1, lineItemKey2) {
+                  return function (event) {
+                    event.preventDefault();
+                    openPopup(id, lineItemKey1, lineItemKey2);
+                  };
+                }
 
-      //   return table;
-      // }
+                link.addEventListener("click", createEventListener(data[prop], lineItemKey1, lineItemKey2));
+
+                cell.textContent = ""; // Clear the cell content
+                cell.appendChild(link);
+                } else {
+                  cell.textContent = data[prop];
+                }
+              } else if (prop.toLowerCase() === "degree" && key === "inventoryDiscrepancies") {
+                switch (data[prop]) {
+                  case 1:
+                    cell.textContent = "Negative";
+                    break;
+                  case 2:
+                    cell.textContent = "Minor";
+                    break;
+                  case 3:
+                    cell.textContent = "Significant";
+                    break;
+                  case 4:
+                    cell.textContent = "Critical";
+                    break;
+                  case 5:
+                    cell.textContent = "Extremely Critical";
+                    break;
+                  default:
+                    cell.textContent = "Unknown";
+                }
+              } else if (prop.toLowerCase().includes("difference")) {
+                cell.textContent = (parseFloat(data[prop]) * -100).toFixed(2) + "%";
+              } else if (prop.toLowerCase().includes("date") || prop.toLowerCase().includes("time")) {
+                cell.textContent = formatDateTime(data[prop]);
+              } else {
+                cell.textContent = data[prop];
+              }
+
+              row.appendChild(cell);
+            }
+
+            table.appendChild(row);
+          });
+
+          tableContainer.appendChild(table);
+
+          document.getElementById("reportingTables").appendChild(tableContainer);
+        }
+      }
+
+      function checkArraysAndDisplayMessage(message) {
+          var allArrays = [employeesArray, transactionsArray, ordersArray, inventoryLogsArray, inventoryTransactionsArray];
+
+          if (allArrays.every(array => Array.isArray(array) && array.length === 0)) {
+              setResultMessage(message, "success");
+          }
+      }
+
+      document.getElementById("viewInventoryDiscrepenciesBtn").addEventListener("click", async function() {
+        const userInfoResponse = await fetch('/api/users/userInfo');
+        const userInfo = await userInfoResponse.json();
+        const locationID = userInfo.locationID;
+        populateArrays(locationID);
+        generateTables(locationID);
+      });
+
+      async function openPopup(id, lineItemKey1, lineItemKey2) {
+        const lineItemsPromise = fetchLineItems(id, lineItemKey1, lineItemKey2);
+
+        const lineItems = await lineItemsPromise;
+
+        if (Array.isArray(lineItems)) {
+          const lineItemsTable = generateLineItemsTable(lineItems);
+          lineItemsTable.id = "lineItemsTable";
+          const popupWindow = window.open("", "_blank", "width=600,height=400");
+          const style = popupWindow.document.createElement("style");
+
+          style.textContent = `
+            #lineItemsTable {
+              margin-top: 20px !important;
+            }
+
+            #lineItemsTable table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              margin-bottom: 10px !important;
+            }
+
+            #lineItemsTable th, #lineItemsTable td {
+              border: 1px solid black !important;
+              padding: 8px !important;
+              text-align: left !important;
+            }
+
+            #lineItemsTable th {
+              background-color: #f2f2f2 !important;
+            }
+          `;
+          
+          popupWindow.document.head.appendChild(style);
+
+          popupWindow.document.body.appendChild(lineItemsTable);
+        } else {
+          console.error("Error: lineItems is not an array");
+        }
+      }
+
+      async function fetchLineItems(id, lineItemKey1, lineItemKey2) {
+        const response = await fetch(`/api/${lineItemKey1}/${lineItemKey2}/lineItems/${id}`);
+        return response.json();
+      }
+
+      function generateLineItemsTable(lineItems) {
+        var table = document.createElement("table");
+        var headerRow = document.createElement("tr");
+
+        for (var prop in lineItems[0]) {
+          var th = document.createElement("th");
+          th.textContent = prop.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+          th.textContent = th.textContent.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+          headerRow.appendChild(th);
+        }
+
+        table.appendChild(headerRow);
+
+        // Create a row for each line item
+        lineItems.forEach(function (item) {
+          var row = document.createElement("tr");
+
+          for (var prop in item) {
+            var cell = document.createElement("td");
+
+            // Check if the column name includes "difference"
+            if (prop.toLowerCase().includes("difference")) {
+              // Apply the same format: make it negative, multiply by 100, round to two decimal places, and append "%"
+              cell.textContent = (parseFloat(item[prop]) * -100).toFixed(2) + "%";
+            } else {
+              cell.textContent = item[prop];
+            }
+
+            row.appendChild(cell);
+          }
+
+          table.appendChild(row);
+        });
+
+        return table;
+      }
     </script>
   </body>
 </html>
