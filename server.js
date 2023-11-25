@@ -25,38 +25,40 @@ const inventoryTransactionRouter = require('./routes/inventoryTransactionRouter'
 const menuItemRouter = require('./routes/menuItemRouter');
 const deliveryRouter = require('./routes/deliveryRouter');
 
-// Serve static files
-app.use(express.static('public'));
-app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
-
 // direct traffic and protect assets from users who aren't logged in
 app.use((req, res, next) => {
   const token = req.cookies.authToken;
+  const URL = req.url;
 
-  if (
-    (token && req.url.includes('login.html')) ||
-    (token && req.url.includes('account-creation.html'))
-  ) {
-    res.redirect('/index.html');
-  } else if (req.url === '/') {
+  if (URL === '/') {
     if (token) {
       res.redirect('/index.html');
     } else {
-      res.sendFile(path.join(__dirname, 'public', 'login.html'));
+      res.redirect('/login.html');
     }
   } else if (
-    !req.url.includes('login.html') &&
-    !req.url.includes('account-creation.html') &&
-    !req.url.includes('.css') &&
-    !req.url.includes('.png') &&
-    !req.url.includes('login') &&
-    !req.url.includes('registration')
+    (token && URL.includes('login.html')) ||
+    (token && URL.includes('account-creation.html'))
+  ) {
+    res.redirect('/index.html'); }
+  else if (
+    !URL.includes('login.html') &&
+    !URL.includes('account-creation.html') &&
+    !URL.includes('.css') &&
+    !URL.includes('.png') &&
+    !URL.includes('.js') &&
+    !URL.includes('login') &&
+    !URL.includes('registration')
   ) {
     verifyToken(req, res, next);
   } else {
     next();
   }
 });
+
+// Serve static files
+app.use(express.static('public'));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
 // API routes
 app.post('/registration', userController.registerUser);

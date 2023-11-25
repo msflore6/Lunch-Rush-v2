@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const secretKey = process.env.SECRET_KEY;
+// const secretKey = process.env.SECRET_KEY;
+const secretKey = "ASUIFT402CapstoneLunchRushBuhlFloresFredericksenSparksWalsh";
 
 const handleLoginRedirect = (res, message) => {
   const redirectUrl = `/login.html?message=${encodeURIComponent(message)}`;
@@ -25,7 +26,7 @@ const authenticateJWT = (req, res, next) => {
         return handleLoginRedirect(res, 'Your session has expired, please log back in.');
       } else {
         // Other errors during token verification
-        return res.status(403).json({ message: 'Forbidden' });
+        return handleLoginRedirect(res, 'You must be logged in to access this page.');
       }
     }
 

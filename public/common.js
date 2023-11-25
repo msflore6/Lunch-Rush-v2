@@ -18,7 +18,6 @@ function checkTokenExpiration() {
     })
     .then(data => {
       if (data.expired) {
-        // Token has expired, handle accordingly
         const logoutMessage = 'Your session has expired, please log back in.';
         const redirectUrl = '/login.html?message=' + encodeURIComponent(logoutMessage);
         window.location.href = redirectUrl;
@@ -46,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return response.json();
         })
         .then(data => {
-          console.log(data);
+          // console.log(data);
           const logoutMessage = 'User logged out successfully.';
           const redirectUrl = '/login.html?message=' + encodeURIComponent(logoutMessage);
           window.location.href = redirectUrl;

@@ -32,7 +32,7 @@
       <main>
         <h2>Ordering Form</h2>
         <section id="form">
-          <form id="order-form" class="dynamic-ingredient-form" action="https://wp.zybooks.com/form-viewer.php" method="POST">
+          <form id="order-form" class="dynamic-ingredient-form">
             <div class="response-message" id="response-message"></div>
             <div id="ingredients-container">
               <!-- Ingredient input sections will be dynamically added here -->
@@ -68,7 +68,6 @@
 					event.preventDefault();
 
 					try {
-						// Get user info
 						const userInfoResponse = await fetch('/api/users/userInfo');
 						const userInfo = await userInfoResponse.json();
 

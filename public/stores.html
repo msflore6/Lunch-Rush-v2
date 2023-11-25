@@ -245,7 +245,7 @@
               if (prop.toLowerCase().includes("id")) {
                 if (key !== "employees" && !["employeeid", "outgoinglocationid", "incominglocationid"].includes(prop.toLowerCase())) {
                   var link = document.createElement("a");
-                  link.href = "#"; // Set the href attribute to "#" for now
+                  link.href = "#";
                   link.textContent = data[prop];
 
                 function createEventListener(id, tableKey) {

@@ -78,9 +78,7 @@ exports.getInventoryTransactionsByLocationByDateRange = (req, res) => {
       res.status(500).send('Internal Server Error');
       return;
     }
-    console.log("query: ", query);
     res.json(results);
-    console.log("results: ", results)
   });
 };
 

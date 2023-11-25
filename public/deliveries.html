@@ -127,9 +127,9 @@
 					const data = await response.json();
 					return data;
 				} catch (error) {
-					// console.error('Error fetching line items:', error);
-					// setResultMessage('An error occurred. Please try again later.', 'error');
-					// return [];
+					console.error('Error fetching line items:', error);
+					setResultMessage('An error occurred. Please try again later.', 'error');
+					return [];
 				}
 			}
 
@@ -187,7 +187,6 @@
 				let message;
 
 				try {
-					// Get user info
 					const userInfoResponse = await fetch('/api/users/userInfo');
 					const userInfo = await userInfoResponse.json();
 					const locationID = userInfo.locationID;
@@ -277,7 +276,7 @@
 						message = "Delivery was saved successfully."
 					}
 
-					// Prepare data for inventory transaction line items
+					// Prepare data for delivery line items
 					const ingredients = [];
 					const ingredientSections = document.querySelectorAll('.ingredient-section');
 					var loopCounter = 0;
@@ -296,12 +295,6 @@
 						ingredients.push(ingredientObject);
 						loopCounter++;
 					});
-
-					console.log("deliveryObject :");
-					console.log(deliveryObject);
-					console.log("")
-					console.log("ingredients :");
-					console.log(ingredients);
 
 					// Post delivery
 					if (orderRadio.checked) {
@@ -336,7 +329,7 @@
 							const result = await postLineItemsResponse.json();
 						} catch (error) {
 							console.error('Error posting line item:', error);
-							// setResultMessage('An error occurred. Please try again later.', 'error');
+							setResultMessage('An error occurred. Please try again later.', 'error');
 							return;
 						}
 					}
@@ -345,7 +338,7 @@
 
 				} catch (error) {
 					console.error('Error:', error);
-					// setResultMessage('An error occurred. Please try again later.', 'error');
+					setResultMessage('An error occurred. Please try again later.', 'error');
 				}
 			});
 		});
@@ -368,11 +361,7 @@
 				}
 
 				const orderID = orderIDResponse ? await orderIDResponse.json() : [];
-				// console.log("orderDeliveries: ", orderDeliveries);
-				// console.log("orderID: ", orderID);
 				const inventoryTransactionID = inventoryTransactionIDResponse ? await inventoryTransactionIDResponse.json() : [];
-				// console.log("inventoryTransactionDeliveries: ", inventoryTransactionDeliveries);
-				// console.log("inventoryTransactionID: ", inventoryTransactionID);
 
 				const deliveryIDField = deliveryType === 1 ? 'orderID' : 'inventoryTransactionID';
 
@@ -392,7 +381,7 @@
 				return options;
 			} catch (error) {
 				console.error('Error:', error);
-				// setResultMessage('An error occurred. Please try again later.', 'error');
+				setResultMessage('An error occurred. Please try again later.', 'error');
 			}
 		}
 			

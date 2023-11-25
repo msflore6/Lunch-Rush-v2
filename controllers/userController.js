@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
-const secretKey = process.env.SECRET_KEY;
+// const secretKey = process.env.SECRET_KEY;
+const secretKey = "ASUIFT402CapstoneLunchRushBuhlFloresFredericksenSparksWalsh";
 
 exports.registerUser = (req, res) => {
     const { firstName, lastName, username, password, confirm_password, employeeID, locationID } = req.body;
@@ -50,18 +51,7 @@ exports.registerUser = (req, res) => {
 };
 
 exports.changePassword = (req, res) => {
-  console.log("");
   const { currentPassword, confirmCurrentPassword, newPassword, confirmNewPassword, username } = req.body;
-
-  console.log("Request Body:", req.body);
-  console.log("");
-
-  console.log("Parameters:");
-  console.log("Username: ", username);
-  console.log("Current Password: ", currentPassword);
-  console.log("Confirm Current Password: ", confirmCurrentPassword);
-  console.log("New Password: ", newPassword);
-  console.log("Confirm New Password: ", confirmNewPassword);
 
   if (currentPassword !== confirmCurrentPassword) {
     return sendError(res, 'Current password and confirmation do not match');
@@ -89,7 +79,6 @@ exports.changePassword = (req, res) => {
     }
 
     const user = results[0];
-    console.log("User credentials: ", user)
 
     // Compare the hashed current password
     bcrypt.compare(newPassword.trim(), user.passwordHash, (err, match) => {
@@ -113,7 +102,6 @@ exports.changePassword = (req, res) => {
 
       // Hash the new password
       bcrypt.hash(newPassword, 10, (err, hash) => {
-        console.log("Hashing new password...")
         if (err) {
           return sendError(res, 'Internal Server Error');
         }
@@ -140,7 +128,6 @@ exports.changePassword = (req, res) => {
     
           res.cookie('authToken', newToken, { httpOnly: true, maxAge: 30 * 60 * 1000 });
 
-          console.log("SQL statement for password update successful.")
           const successMessage = 'Password changed successfully.';
           res.json({ message: successMessage });
         });
@@ -174,7 +161,6 @@ exports.loginUser = (req, res) => {
       }
   
       if (!match) {
-          console.log('Password Hash did not match.')
           return handleLoginFailure(res, 'Invalid username or password');
       }
   
@@ -229,11 +215,9 @@ function handleLoginFailure(res, message) {
   
     // Check if the request is an API call or HTML form submission
     if (res.headersSent) {
-      // This means the response has already been sent (probably an API call)
       console.error('Login failure:', message);
       return res.status(401).send(alertMessage);
     } else {
-      // HTML form submission, redirect with an error message
       console.error('Login failure:', message);
       res.send(alertMessage);
     }

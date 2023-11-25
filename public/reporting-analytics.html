@@ -150,7 +150,7 @@
       }
 
       async function populateArraysByDate(locationID, startDate, endDate) {
-        inventoryDiscrepanciesArray = await fetchData('inventoryLogs', 'inventoryDiscrepancies', locationID);
+        inventoryDiscrepanciesArray = await fetchDataByDate('inventoryLogs', 'inventoryDiscrepancies', locationID, startDate, endDate);
         deliveriesInventoryTransactionsArray = await fetchDataByDate('deliveries', 'inventoryTransactionsReporting', locationID, startDate, endDate);
         deliveriesOrdersArray = await fetchDataByDate('deliveries', 'ordersReporting', locationID, startDate, endDate);
       }
@@ -177,20 +177,6 @@
           inventoryTransactionDeliveries: deliveriesInventoryTransactionsArray,
           orderDeliveries: deliveriesOrdersArray,
         };
-
-        if (
-          Object.keys(tableData).every(
-            (key) => Array.isArray(tableData[key]) && tableData[key].length === 0
-          )
-        ) {
-          if (allDatesInput.checked) { 
-            setResultMessage("No data was found.", "success");
-            return;
-          } else if (dateRangeInput.checked) {
-            setResultMessage("No data was found for the selected date range.", "success");
-            return;
-          }
-        }
 
         for (var key in tableData) {
           if (tableData[key].length === 0) {
@@ -307,7 +293,7 @@
       }
 
       function checkArraysAndDisplayMessage(message) {
-          var allArrays = [employeesArray, transactionsArray, ordersArray, inventoryLogsArray, inventoryTransactionsArray];
+          var allArrays = [inventoryDiscrepanciesArray, deliveriesInventoryTransactionsArray, deliveriesOrdersArray];
 
           if (allArrays.every(array => Array.isArray(array) && array.length === 0)) {
               setResultMessage(message, "success");
@@ -388,9 +374,7 @@
           for (var prop in item) {
             var cell = document.createElement("td");
 
-            // Check if the column name includes "difference"
             if (prop.toLowerCase().includes("difference")) {
-              // Apply the same format: make it negative, multiply by 100, round to two decimal places, and append "%"
               cell.textContent = (parseFloat(item[prop]) * -100).toFixed(2) + "%";
             } else {
               cell.textContent = item[prop];

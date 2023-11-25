@@ -111,11 +111,6 @@
               const currentDateTime = getCurrentTimeInPhoenix().toISOString().slice(0, 19).replace("T", " ");
               const currentDate = getCurrentDateInPhoenix();
 
-              // console.log("previousLogDateTime: ", previousLogDateTime);
-              // console.log("previousLogDate: ", previousLogDate);
-              // console.log("currentDateTime: ", currentDateTime);
-              // console.log("currentDate: ", currentDate);
-
               const locationID = userInfo.locationID;
               const startDateTime = previousLogDateTime;
               const startDate = previousLogDate;
@@ -135,9 +130,6 @@
               const inventoryTransactionsResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/outgoing/${locationID}/${startDate}/${endDate}`);
               const inventoryTransactionsData = await inventoryTransactionsResponse.json();
 
-              // const ordersResponse = await fetch(`/api/orders/orders/${locationID}/${startDateTime}/${endDateTime}`);
-              // const ordersData = await ordersResponse.json();
-
               const transactionsResponse = await fetch(`/api/transactions/transactions/${locationID}/${startDateTime}/${endDateTime}`);
               const transactionsData = await transactionsResponse.json();
 
@@ -149,24 +141,14 @@
               const deliveriesInventoryTransactions = deliveriesInventoryTransactionsData;
               const inventoryLogs = inventoryLogsData;
               const inventoryTransactions = inventoryTransactionsData;
-              // const orders = ordersData;
               const transactions = transactionsData;
               const menuItems = menuItemsData;
 
-              // console.log('inventoryTransactions: ', inventoryTransactions);
-
-              // console.log("deliveriesOrders: ", deliveriesOrders);
-              // console.log("deliveriesInventoryTransactions: ", deliveriesInventoryTransactions);
-              // console.log("inventoryLogs: ", inventoryLogs);
-              // console.log("inventoryTransactions: ", inventoryTransactions)
-              // console.log("orders: ", orders);
-              // console.log("transactions: ", transactions);
-
               const deliveriesLineItems = [];
-              const inventoryLogsLineItems = []; //
+              const inventoryLogsLineItems = [];
               const inventoryTransactionsLineItems = [];
-              const transactionsLineItems = []; //
-              const menuItemIngredients = []; //
+              const transactionsLineItems = [];
+              const menuItemIngredients = [];
 
               // Function to fetch line items for a specific entry
               async function fetchLineItems(apiRoute, id) {
@@ -191,19 +173,11 @@
               await populateLineItemsArray('inventoryTransactions', inventoryTransactions, inventoryTransactionsLineItems, 'inventoryTransaction');
               await populateLineItemsArray('transactions', transactions, transactionsLineItems, 'transaction');
 
-              // console.log("inventoryTransactionsLineItems: ", inventoryTransactionsLineItems);
-
               for (let i = 1; i <= 5; i++) {
                 const response = await fetch(`/api/menuItems/menuItems/ingredients/${i}`);
                 const menuItemIngredientList = await response.json();
                 menuItemIngredients.push(menuItemIngredientList);
               }
-
-              // console.log("deliveriesLineItems: ", deliveriesLineItems);
-              // console.log("inventoryLogsLineItems: ", inventoryLogsLineItems);
-              // console.log("inventoryTransactionsLineItems: ", inventoryTransactionsLineItems);
-              // console.log("transactionsLineItems: ", transactionsLineItems);
-              // console.log("menuItemIngredients: ", menuItemIngredients);
 
               // initialize quantity variables.
               let breadRollsQuantity = 0,
@@ -256,40 +230,19 @@
                   case 11:
                     tomatoQuantity += quantity;
                     break;
-                  // Add more cases if needed for additional ingredients
                   default:
                     // Handle unexpected ingredientID (if any)
                     break;
                 }
               }
 
-              // Now the quantity variables should be updated based on inventoryLogsLineItems
-              // console.log("Updated Quantities (after Inventory Log check):");
-              // console.log("Bread Rolls: ", breadRollsQuantity);
-              // console.log("Mayonnaise: ", mayonnaiseQuantity);
-              // console.log("Mustard: ", mustardQuantity);
-              // console.log("Ranch Dressing: ", ranchDressingQuantity);
-              // console.log("Sliced Turkey: ", slicedTurkeyQuantity);
-              // console.log("Sliced Ham: ", sliceHamQuantity);
-              // console.log("Rotissere Chicken: ", rotissereChickenQuantity);
-              // console.log("Bacon: ", baconQuantity);
-              // console.log("Cheese: ", cheeseQuantity);
-              // console.log("Lettuce: ", lettuceQuantity);
-              // console.log("Tomato: ", tomatoQuantity);
-
               for (const transactionLineItem of transactionsLineItems) {
-                // console.log("transactionLineItem: ", transactionLineItem);
                 if (transactionLineItem.menuItemID) {
-                  // console.log("transactionLineItem.menuItemID: ", transactionLineItem.menuItemID);
                   const menuItemIndex = transactionLineItem.menuItemID - 1;
-                  // console.log("menuItemIndex: ", menuItemIndex);
                   if (menuItemIndex >= 0 && menuItemIndex < menuItemIngredients.length) {
                     const menuItemIngredientsForItem = menuItemIngredients[menuItemIndex];
-                    // console.log("menuItemIngredientsForItem: ", menuItemIngredientsForItem);
                     for (let i = 0; i < menuItemIngredientsForItem.length; i++) {
-                      // console.log("menuItemIngredientsForItem: ", menuItemIngredientsForItem);
                       const ingredient = menuItemIngredientsForItem[i];
-                      console.log("transactionLineItem.quantity: ", transactionLineItem.quantity);
                       switch (ingredient.ingredientID) {
                         case 1:
                           breadRollsQuantity -= ingredient.quantity * transactionLineItem.quantity;
@@ -333,19 +286,6 @@
                   }
                 }
               }
-
-              // console.log("Updated Quantities (after Transaction and MenuIngredient check):");
-              // console.log("Bread Rolls: ", breadRollsQuantity);
-              // console.log("Mayonnaise: ", mayonnaiseQuantity);
-              // console.log("Mustard: ", mustardQuantity);
-              // console.log("Ranch Dressing: ", ranchDressingQuantity);
-              // console.log("Sliced Turkey: ", slicedTurkeyQuantity);
-              // console.log("Sliced Ham: ", sliceHamQuantity);
-              // console.log("Rotissere Chicken: ", rotissereChickenQuantity);
-              // console.log("Bacon: ", baconQuantity);
-              // console.log("Cheese: ", cheeseQuantity);
-              // console.log("Lettuce: ", lettuceQuantity);
-              // console.log("Tomato: ", tomatoQuantity);
 
               for (const inventoryTransaction of inventoryTransactions) {
                 const inventoryTransactionID = inventoryTransaction.inventoryTransactionID;
@@ -404,19 +344,6 @@
                 console.error("Error in the loop:", error);
               }
             }
-
-              // console.log("Updated Quantities (after inventoryTransaction check):");
-              // console.log("Bread Rolls: ", breadRollsQuantity);
-              // console.log("Mayonnaise: ", mayonnaiseQuantity);
-              // console.log("Mustard: ", mustardQuantity);
-              // console.log("Ranch Dressing: ", ranchDressingQuantity);
-              // console.log("Sliced Turkey: ", slicedTurkeyQuantity);
-              // console.log("Sliced Ham: ", sliceHamQuantity);
-              // console.log("Rotissere Chicken: ", rotissereChickenQuantity);
-              // console.log("Bacon: ", baconQuantity);
-              // console.log("Cheese: ", cheeseQuantity);
-              // console.log("Lettuce: ", lettuceQuantity);
-              // console.log("Tomato: ", tomatoQuantity);
 
               for (const deliveryOrder of deliveriesOrders) {
                 for (const deliveryLineItem of deliveriesLineItems) {
@@ -516,19 +443,6 @@
                   }
                 }
               }
-
-              console.log("Final Quantities:");
-              console.log("Bread Rolls: ", breadRollsQuantity);
-              console.log("Mayonnaise: ", mayonnaiseQuantity);
-              console.log("Mustard: ", mustardQuantity);
-              console.log("Ranch Dressing: ", ranchDressingQuantity);
-              console.log("Sliced Turkey: ", slicedTurkeyQuantity);
-              console.log("Sliced Ham: ", sliceHamQuantity);
-              console.log("Rotissere Chicken: ", rotissereChickenQuantity);
-              console.log("Bacon: ", baconQuantity);
-              console.log("Cheese: ", cheeseQuantity);
-              console.log("Lettuce: ", lettuceQuantity);
-              console.log("Tomato: ", tomatoQuantity);
 
               // Prepare data for inventory log
               const inventoryLogObject = {
@@ -658,7 +572,7 @@
               }
 
               if (discrepancyDetected === true) {
-                // Post inventory log
+                // Post inventory discrepancy
                 try {
                   const postDiscrepancyResponse = await fetch(`/api/inventoryLogs/inventoryDiscrepancies`, {
                     method: 'POST',
@@ -669,10 +583,10 @@
                   });
                 } catch (error) {
                   console.error('Error posting discrepancy:', error);
-                  // setResultMessage('An error occurred. Please try again later.', 'error');
+                  setResultMessage('An error occurred. Please try again later.', 'error');
                 }
 
-                // Post inventory log line items
+                // Post inventory discrepancy line items
                 for (const discrepancyItem of inventoryDiscrepancyLineItems) {
                   try {
                     const postDiscrepancyLineItemsResponse = await fetch(`/api/inventoryLogs/inventoryDiscrepancies/lineItems`, {
@@ -686,7 +600,7 @@
                     const result = await postDiscrepancyLineItemsResponse.json();
                   } catch (error) {
                     console.error('Error posting line item:', error);
-                    // setResultMessage('An error occurred. Please try again later.', 'error');
+                    setResultMessage('An error occurred. Please try again later.', 'error');
                     return;
                   }
                 }
@@ -696,7 +610,7 @@
 
             } catch (error) {
               console.error('Error:', error);
-              // setResultMessage('An error occurred. Please try again later.', 'error');
+              setResultMessage('An error occurred. Please try again later.', 'error');
             }
           }
           )});

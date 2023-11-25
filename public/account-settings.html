@@ -101,10 +101,6 @@
                 username: userInfo.username,
               };
 
-              console.log("formData: ", formData);
-
-              console.log("formDataJSON: ", JSON.stringify(formData));
-
               const response = await fetch('/api/users/change-password', {
                 method: 'POST',
                 headers: {

@@ -86,14 +86,6 @@
 						const userInfoResponse = await fetch('/api/users/userInfo');
 						const userInfo = await userInfoResponse.json();
 
-						// const outgoingRadio = document.getElementById("outgoing");
-   						// const incomingRadio = document.getElementById("incoming");
-
-						// if (!outgoingRadio.checked && !incomingRadio.checked) {
-						// 	setResultMessage("Please select whether the chosen location is the outgoing or incoming location.", 'error');
-						// 	return;
-						// }
-
 						const selectedLocationID = parseInt(document.getElementById("locations").value, 10);
 
 						if (selectedLocationID === userInfo.locationID) {
@@ -102,16 +94,6 @@
 						}
 
 						checkDuplicates();
-
-						// Old code for getttomg the latest inventory transaction ID
-						// let outgoingLocationID, incomingLocationID;
-						// if (outgoingRadio.checked) {
-						// 	outgoingLocationID = selectedLocationID;
-						// 	incomingLocationID = userInfo.locationID;
-						// } else if (incomingRadio.checked) {
-						// 	outgoingLocationID = userInfo.locationID;
-						// 	incomingLocationID = selectedLocationID;
-						// }
 
 						const latestTransactionIDResponse = await fetch(`/api/inventoryTransactions/inventoryTransactions/latest/${userInfo.locationID}`);
 						const latestTransactionIDData = await latestTransactionIDResponse.json();

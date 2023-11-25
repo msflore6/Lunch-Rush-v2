@@ -88,7 +88,7 @@ exports.getInventoryDiscrepanciesByLocationAndDateRange = (req, res) => {
   const startDate = req.params.startDate;
   const endDate = req.params.endDate;
   const query = `
-    SELECT inventoryDiscrepancyID, dateAndTime, totalDifference, degree
+    SELECT inventoryLogID, dateAndTime, totalDifference, degree
     FROM InventoryDiscrepancies 
     WHERE locationID = ${locationID}
     AND

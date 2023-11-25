@@ -368,7 +368,7 @@ th {
   margin-bottom: 15px;
 }
 
-#itemCostSpan, #itemPriceSpane {
+#itemCostSpan, #itemPriceSpan {
   display: flex;
   justify-content: center;
   margin-bottom: 10px;
